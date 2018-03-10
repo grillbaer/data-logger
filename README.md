@@ -41,7 +41,7 @@ The temperature readings are written to CSV files and held for 32 days. This als
 
 ## Installation / Configuration
 
-TO BE DONE!
+TO BE DONE:
 - Set-up Python modules
 - Set-up W1 bus (Kernel modules)
 - Patch Kivy logging (do not set root logger which clashed with standard Python logging)
@@ -49,6 +49,8 @@ TO BE DONE!
 - Use Raspi in console mode since Kivy input events also go to the underlying X UI and trigger things you certainly won't want
 - Change permissions to allow display backlight control
 - Patch pigpiod (stack smashing issue)
+- log files path `logs/`
+- CSV files path `csv/`
 - How to find out the DS18B20 sensor IDs
 - How to configure the data logger by changing `signalsourcesconfig.py`
 - Nore topics? Find out by clean install with pure Raspbian
