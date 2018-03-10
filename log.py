@@ -15,6 +15,7 @@ import psutil
 import subprocess
 import utils
 
+os.makedirs('logs', 0o775, True)
 
 LOGGING = {
     'version': 1,
