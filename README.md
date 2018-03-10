@@ -41,16 +41,17 @@ The temperature readings are written to CSV files and held for 32 days. This als
 
 ## Installation / Configuration
 
-TO BE DONE:
-- Set-up Python modules
-- Set-up W1 bus (Kernel modules)
-- Patch Kivy logging (do not set root logger which clashed with standard Python logging)
-- Use most current Kivy development version to allow graphs within Carousel widget
-- Use Raspi in console mode since Kivy input events also go to the underlying X UI and trigger things you certainly won't want
-- Change permissions to allow display backlight control
+TODO - topics to cover:
+- Set-up Python modules (`pip3`, `garden`, don't forget `sudo`)
+- Set-up W1 bus (kernel modules)
+- Patch Kivy logging (do not set root logger which clashes with standard Python logging and is buggy)
+- Use most current Kivy development version to support garden graphs within Carousel widget
+- Use Raspi in console mode since Kivy input events also go to the underlying X-UI and trigger things you certainly don't want
+- Change permissions of `/sys/class/backlight/rpi_backlight/bl_power` to allow display backlight control (screen saver)
 - Patch pigpiod (stack smashing issue)
 - log files path `logs/`
 - CSV files path `csv/`
-- How to find out the DS18B20 sensor IDs
-- How to configure the data logger by changing `signalsourcesconfig.py`
-- Nore topics? Find out by clean install with pure Raspbian
+- Discover the DS18B20 sensor IDs in `/sys/bus/w1/devices/` 
+- Configure data logger by changing `signalsourcesconfig.py`
+- Prefer WLAN to LAN to avoid power surges depending on sensor cabling
+- More topics? Find out by clean install with pure Raspbian
