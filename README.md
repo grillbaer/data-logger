@@ -6,18 +6,21 @@ This is a simply hobby project for logging temperatures in my heating system. Fe
 ## Features
 
 ### Current Temperatures
-Shows the current readings:
+Show the current readings:
 ![Measurements View](screenshots/measurements.png)
 
 ### Temperature Graphs
-Shows how temperatures developed over the last 24 hours:
+Show how temperatures developed over the last 24 hours:
 ![Graphs View](screenshots/graphs.png)
 
 ### MQTT Client
-Publishes all temperature readings to a MQTT broker. This allows to track and show them in common MQTT apps.
+Publish all temperature readings to a MQTT broker. This allows to track and show them in common MQTT apps.
 The MQTT messages contain JSON with timestamp and value:
 
     {"timestamp": "2018-03-10T16:53:11.335794", "unit": "\u00b0C", "value": 24.8}
+
+### CSV Logging
+The temperature readings are written to CSV files and held for 32 days. This also allows to immediately re-fill the graphs view after restart.
 
 ## Hardware
 
