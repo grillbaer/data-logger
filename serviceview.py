@@ -7,6 +7,7 @@ __copyright__ = 'Copyright 2018, Holger Fleischmann, Bavaria/Germany'
 __license__ = 'Apache License 2.0'
 
 import logging
+import os
 from subprocess import call
 
 from kivy.uix.boxlayout import BoxLayout
@@ -37,7 +38,7 @@ class ServiceScreen(BoxLayout):
         
     def update(self):
         logger.info('UPDATE triggered')
-        if self.exec(['sh', '-c', 'cd /home/pi/datalogger; svn update']) == 0:
+        if self.exec(['sh', '-c', 'cd ' + os.getcwd() + '; git pull']) == 0:
             self.reboot()
     
     def exec(self, command):
