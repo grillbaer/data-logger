@@ -1,7 +1,10 @@
 # Data Logger
 Measure, display and log temperatures with Raspberry PI.
 
-This is a simply hobby project for logging temperatures in my heating system. Feel free to adjust and use it in your own projects.
+This is a simply hobby project for logging temperatures in my heat pump and heating system. 
+Feel free to adjust and use it in your own projects (Apache License Version 2.0).
+
+It contains some icons from [Flaticon](https://www.flaticon.com/), license [Creative Commons BY 3.0](http://creativecommons.org/licenses/by/3.0/), see [CREDITS](CREDITS.html) for details.
 
 ## Features
 
