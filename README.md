@@ -51,11 +51,12 @@ TODO - topics to cover:
 - Patch Kivy logging (do not set root logger which clashes with standard Python logging and is buggy)
 - Use most current Kivy development version to support garden graph within Carousel widget
 - Use Raspi in console mode since Kivy input events also go to the underlying X-UI and trigger things you certainly don't want
-- Change permissions of `/sys/class/backlight/rpi_backlight/bl_power` to allow display backlight control (screen saver)
+- Change permissions `chmod 666 '/sys/class/backlight/rpi_backlight/bl_power'` in `/etc/rc.local` to allow display backlight control (screen saver)
 - Patch pigpiod (stack smashing issue)
-- log files path `logs/`
+- Log files path `logs/`
 - CSV files path `csv/`
 - Discover the DS18B20 sensor IDs in `/sys/bus/w1/devices/` 
 - Configure data logger by changing `signalsourcesconfig.py`
+- Start with `python3 main.py`, auto-start in `/etc/rc.local` as `su - pi -c 'cd data-logger; python3 main.py &'`
 - Prefer WLAN to LAN to avoid power surges depending on sensor cabling
 - More topics? Find out by clean install with pure Raspbian
