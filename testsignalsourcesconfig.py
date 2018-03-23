@@ -18,9 +18,9 @@ signal_sources_config = {
             TestSource(35, 0.1, label='Heizung Vorlauf',  unit='°C', value_format='{:.1f}', color=[1.0, 0.0, 0.0, 1.0], z_order=2),
             TestSource(52, 0.2, label='WW Vorlauf',       unit='°C', value_format='{:.1f}', color=[0.9, 0.0, 0.7, 1.0], z_order=0),
             TestSource(28, 0.3, label='Rücklauf',         unit='°C', value_format='{:.1f}', color=[0.5, 0.1, 0.5, 1.0], z_order=1),
-            TestSource(57, 0.1, label='Heizgas',          unit='°C', value_format='{:.1f}', color=[0.8, 0.6, 0.3, 1.0], z_order=-1),
-            TestSource(30, 0.1, label='Flüssigkeit',      unit='°C', value_format='{:.1f}', color=[0.1, 0.2, 0.4, 1.0], z_order=-1),
-            TestSource(18, 0.1, label='Sauggas',          unit='°C', value_format='{:.1f}', color=[0.4, 0.3, 0.1, 1.0], z_order=-1),
+            TestSource(57, 0.1, label='Heizgas',          unit='°C', value_format='{:.1f}', color=[0.8, 0.6, 0.3, 1.0], z_order=-1, with_graph=False),
+            TestSource(30, 0.1, label='Flüssigkeit',      unit='°C', value_format='{:.1f}', color=[0.1, 0.2, 0.4, 1.0], z_order=-1, with_graph=False),
+            TestSource(18, 0.1, label='Sauggas',          unit='°C', value_format='{:.1f}', color=[0.4, 0.3, 0.1, 1.0], z_order=-1, with_graph=False),
         ]},
         {'label' : 'Heizung',
          'sources' : [

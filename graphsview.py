@@ -104,12 +104,14 @@ class GraphsScreen(GestureDetector):
             self.history.delta_seconds = signal_sources_config['history_delta']
         
         self.plots = []
+        self.graph_visible = []
         
         for group in signal_sources_config['groups']:
             group_label = group['label']
             for source in group['sources']:
                 self.graph_labels.append(group_label + ' ' + source.label)
                 self.history.add_source(source)
+                self.graph_visible.append(source.with_graph)
                 plot = SmoothLinePlot(color=source.color)
                 self.plots.append(plot)
              
@@ -135,8 +137,12 @@ class GraphsScreen(GestureDetector):
                 self.ids.graphs_canvas.xmax = self.x_max
                 self.ids.graphs_canvas.xmin = self.x_max - self.x_range
                 
-            for (source, plot) in zip(self.history.sources, self.plots):
-                plot.points = self.history.get_values(source)
+            for (source, plot, visible) in zip(self.history.sources, self.plots, self.graph_visible):
+                if visible:
+                    plot.points = self.history.get_values(source)
+                else:
+                    plot.points = []
+                
         Clock.schedule_once(self.update_graphs, self.history.delta_seconds / 2)
         pass
 
