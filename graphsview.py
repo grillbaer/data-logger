@@ -35,18 +35,20 @@ class GraphsCanvas(Graph):
                          ymax=self.allowed_max_y)
 
 
-class PinchDetector(BoxLayout):
-    __touches = []
+class GestureDetector(BoxLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.__touches = []
         self.pinch_continue = False
+        self.__max_touches = 0
         
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos):
             self.pinch_continue = False
             touch.grab(self)
             self.__touches.append(touch)
+            self.__max_touches += 1
         return super().on_touch_down(touch)
 
     def on_touch_move(self, touch):
@@ -69,6 +71,12 @@ class PinchDetector(BoxLayout):
 
     def on_touch_up(self, touch):
         if touch.grab_current is self:
+            
+            if len(self.__touches) == 1:
+                if self.__max_touches == 1 and touch.is_double_tap:
+                    self.on_double_tap((touch.x, touch.y))
+                self.__max_touches = 0
+                
             self.pinch_continue = False
             touch.ungrab(self)
             self.__touches.remove(touch)
@@ -76,9 +84,12 @@ class PinchDetector(BoxLayout):
 
     def on_pinch(self, pinch_continue, orig_center, center, orig_size, size):
         pass
+    
+    def on_double_tap(self, center):
+        pass
 
         
-class GraphsScreen(PinchDetector):
+class GraphsScreen(GestureDetector):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -109,24 +120,45 @@ class GraphsScreen(PinchDetector):
         self.history.load_from_csv_files()
         self.history.start()
         
+        self.x_range = self.history.max_seconds
+        self.x_max = None
+        
         Clock.schedule_once(self.update_graphs, 0.)
     
     def update_graphs(self, dt):
         with self.history:
-            now = time.time()
-            self.ids.graphs_canvas.xmax = now + self.history.delta_seconds
-            self.ids.graphs_canvas.xmin = now - self.history.max_seconds
+            if self.x_max is None:
+                now = time.time()
+                self.ids.graphs_canvas.xmax = now + self.history.delta_seconds
+                self.ids.graphs_canvas.xmin = now - self.x_range
+            else:
+                self.ids.graphs_canvas.xmax = self.x_max
+                self.ids.graphs_canvas.xmin = self.x_max - self.x_range
+                
             for (source, plot) in zip(self.history.sources, self.plots):
                 plot.points = self.history.get_values(source)
         Clock.schedule_once(self.update_graphs, self.history.delta_seconds / 2)
         pass
 
+    def on_double_tap(self, center):
+        graph = self.ids.graphs_canvas
+        pos = graph.to_data(center[0], center[1])
+        if self.x_max is None:
+            # zoom in
+            self.x_range = self.history.max_seconds / 12
+            self.x_max = min(time.time(), pos[0] + self.x_range / 2)
+        else:
+            # reset zoom
+            self.x_range = self.history.max_seconds
+            self.x_max = None
+        self.update_graphs(None)
+        
     def on_pinch(self, pinch_continue, orig_center, center, orig_size, size):
         graph = self.ids.graphs_canvas
-        if not pinch_continue:
-            print()
-            print()
-            print()
+        #if not pinch_continue:
+        #    print()
+        #    print()
+        #    print()
         # print(str(pinch_continue) + " oc=" + str(orig_center) + " os=" + str(orig_size) + " c=" + str(center) + " s=" + str(size))
         if pinch_continue:
             new_center_y = (self.begin_min_y + self.begin_max_y) / 2.
