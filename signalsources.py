@@ -17,7 +17,7 @@ from tsic import TsicInputChannel
 from kivy.tests.test_clock import callback
 from utils import RepeatTimer
 
-logger = logging.getLogger().getChild(__name__) 
+logger = logging.getLogger().getChild(__name__)
 
 SignalValue = namedtuple('Value', ['value', 'status', 'timestamp'])
 

@@ -1,5 +1,5 @@
 """
-UI implementation of the graph view.
+UI implementation of the graphs view.
 """
 
 __author__ = 'Holger Fleischmann'

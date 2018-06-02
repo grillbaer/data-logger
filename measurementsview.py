@@ -1,5 +1,5 @@
 """
-UI implementation of the measurement view.
+UI implementation of the measurements view.
 """
 
 __author__ = 'Holger Fleischmann'
