@@ -12,6 +12,7 @@ __copyright__ = 'Copyright 2018, Holger Fleischmann, Bavaria/Germany'
 __license__ = 'Apache License 2.0'
 
 from datetime import datetime
+from functools import partial
 import argparse
 import logging
 
@@ -228,18 +229,65 @@ Measurement.UNDEF = Measurement(None, None)
 """ Undefined measurement """
     
 
+class TsicType(object):
+    """
+    Definition of a TSic type.
+    """
+    
+    def __init__(self, name, bytes_to_celcius_func):
+        self.name = name
+        self.__bytes_to_celcius_func = bytes_to_celcius_func
+    
+    def bytes_to_degree_celcius(self, packet_bytes):
+        """
+        Decode the received bytes of a data packet to degrees celsius.
+        """
+        return self.__bytes_to_celcius_func(packet_bytes)
+    
+    def __repr__(self, *args, **kwargs):
+        return self.name
+
+
+def _tsic_11bit(packet_bytes, ht, lt):
+    return ((packet_bytes[0] * 256 + packet_bytes[1]) / 2047. * (ht - lt) + lt)
+
+def _tsic_14bit(packet_bytes, ht, lt):
+    return ((packet_bytes[0] * 256 + packet_bytes[1]) / 16383. * (ht - lt) + lt)
+
+
+TSIC206 = TsicType("TSic 206/306", partial(_tsic_11bit, ht=150, lt=-50))
+""" TSic 206 with range from -50°C to 150°C, 11 bit resolution, +-0.5°C accuracy. Equivalent to TSIC306. """
+
+TSIC306 = TSIC206
+""" TSic 306 with range from -50°C to 150°C, 11 bit resolution, +-0.3°C accuracy. Equivalent to TSIC206. """
+
+#TSIC316 = TsicType(partial(_tsic_14bit, ht=???, lt=???))
+#""" TSic 316 with range from ???°C to ???°C, 14 bit resolution, +-???°C accuracy. """
+# ??? data-sheet not available anywhere, but 316 mentioned in the application notes
+
+TSIC506 = TsicType("TSic 506", partial(_tsic_11bit, ht=60, lt=-10))
+""" TSic 506 with range from -10°C to 60°C, 11 bit resolution, +-0.1°C accuracy. """
+
+TSIC716 = TsicType("TSic 716", partial(_tsic_14bit, ht=60, lt=-10))
+""" TSic 716 with range from -10°C to 60°C, 14 bit resolution, +-0.07°C accuracy. """
+
+
 class TsicInputChannel(object):
     """
-    Receive temperature measurements from a TSIC 206 or TSIC 306 sensor 
+    Receive temperature measurements from a TSIC sensor 
     connected to a Raspberry PI GPIO channel.
+    The default temperature decoding is set to match TSIC 206/306. 
+    Choose other tsic_type TSIC206, TSIC306, TSIC506, TSIC716 if necessary.
     """
 
-    def __init__(self, pigpio_pi, gpio):
+    def __init__(self, pigpio_pi, gpio, tsic_type = TSIC306):
         """
         Initialize TSIC receiving channel.
         pigpio_pi is the pigpio.pi object to use for GPIO access.
         gpio is the as GPIO Broadcom chip number.
+        tsic_type defines the temperature decoding.
         """
+        self.tsic_type = tsic_type
         self.__callback = None
         self.__degree_celsius = None
         self.__timestamp = None
@@ -316,7 +364,7 @@ class TsicInputChannel(object):
         if status == ZacWireInputChannel.STATUS_OK and len(packet_bytes) == 2:
             
             with self.__lock:
-                self.__degree_celsius = ((packet_bytes[0] * 256 + packet_bytes[1]) / 2047. * (150 + 50) - 50)
+                self.__degree_celsius = self.tsic_type.bytes_to_degree_celcius(packet_bytes)
                 self.__timestamp = time.time()
                 measurement = self.measurement
             
@@ -332,15 +380,28 @@ class TsicInputChannel(object):
 
 
 if __name__ == '__main__':
+    
+    tsic_types = { '206' : TSIC206,
+                   '306' : TSIC306,
+                   '506' : TSIC506,
+                   '716' : TSIC716 }
+    
     parser = argparse.ArgumentParser(description=
-        '''Read temperatures from a TSIC 206/306 sensor
-           connected to a Raspberry PI GPIO pin.''')
+        '''Read temperatures from a TSic 206/306/506/716 sensor
+           connected to a Raspberry PI GPIO pin.
+           Select your TSic type to get correct temperatures.
+           The default is TSic 206/306.''')
     parser.add_argument('gpio', type=int, help='GPIO pin as Broadcom number')
+    parser.add_argument('--type', dest='type', choices=tsic_types.keys(), default='206', help='type of TSic sensor - 206/306 is default')
     parser.add_argument('--loop', dest='loop', action='store_const', const=True, default=False, help='print each received measurement until break')
     args = parser.parse_args()
     
+    tsic_type = tsic_types[args.type]
+    
+    print("Receiving data from " + str(tsic_type) + "...")
+    
     pi = pigpio.pi()
-    tsic = TsicInputChannel(pi, args.gpio)
+    tsic = TsicInputChannel(pi, args.gpio, tsic_type)
     try:
         if args.loop:
             tsic.start(callback=lambda m: print(m))
