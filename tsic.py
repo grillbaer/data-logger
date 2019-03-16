@@ -146,7 +146,7 @@ class ZacWireInputChannel(object):
                     self.__bit_count = 0
                     self.__bit_ticks = None
                 
-                elif self.__received_bytes is not None and high_ticks > 150:
+                elif self.__received_bytes is not None and high_ticks >= 2*self.__bit_ticks:
                     # next byte in packet
                     # print('====> NEXT BYTE START')
                     if self.__bit_count == 9:
