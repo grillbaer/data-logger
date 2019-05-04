@@ -40,7 +40,8 @@ The temperature readings are written to CSV files and held for 32 days. This als
 - Language: Python 3.6 (coming from Java I begin to really like Python, however, the code is still at Python beginners' level)
 - UI toolkit: Kivy (nice and simple UIs with multi-touch support, some quirks)
 - Charts: Kivy Garden Graph (fast drawing)
-- GPIO access: PIGPIO (IO with precise timing)
+- TSIC temperature sensors: tsic (sensor reading based on pigpio)
+- GPIO access: pigpio (IO with precise timing)
 
 ## Installation / Configuration
 
