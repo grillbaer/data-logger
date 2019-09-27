@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="container">Test streaming measurement: <span id="mvalue"></span></div>
+<hr>
+{% for group in groups %}
+<h1>{{group.label}}</h1>
+<ul>
+{% for signal in group.signals %}
+<li id="{{group.label}}-{{signallabel}}">
+  <span class="signallabel">{{signal.label}}</span>
+  <span class="signalvalue">{{signal.value}}</span>
+  <span class="signalunit">{{signal.unit}}</span>
+</li>
+{% endfor %}
+</ul>
+{% endfor %}
+{% endblock %}
+
+{% block ownscripts %}
+<script>
+  $(document).ready(function() {
+    var source = new EventSource('/data/eventstream');
+    source.onmessage = function (event) {
+      console.log(event)
+      $('#mvalue').html(event.data);
+    };
+  });
+</script>
+{% endblock %}

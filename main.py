@@ -22,9 +22,10 @@ from kivy.properties import StringProperty
 from kivy.uix.boxlayout import BoxLayout
 
 from mqttclient import MqttClient
+from webapp.webapp import WebApp
 
-from signalsourcesconfig import signal_sources_config
-# from testsignalsourcesconfig import signal_sources_config
+#from signalsourcesconfig import signal_sources_config
+from testsignalsourcesconfig import signal_sources_config
 
 logger = logging.getLogger().getChild(__name__) 
 
@@ -84,7 +85,13 @@ if __name__ == '__main__':
     logger.error('Starting application')
     Config.set('graphics', 'width', '800')
     Config.set('graphics', 'height', '480')
+    
     mqtt_client = MqttClient()
     mqtt_client.use_signals_config(signal_sources_config)
     mqtt_client.start()
+    
+    web_app = WebApp();
+    web_app.use_signals_config(signal_sources_config)
+    web_app.start()
+    
     DataLoggerApp().run()

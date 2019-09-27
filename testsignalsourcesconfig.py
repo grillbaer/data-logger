@@ -40,5 +40,6 @@ signal_sources_config = {
 #    'history_max' : 120,
 #    'history_delta' : 1,
 
-    'mqtt_broker_host' : 'holger-gb-15x'
+    'mqtt_broker_host' : 'holger-gb-15x',
+    'web_app_port' : 5000
 }

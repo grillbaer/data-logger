@@ -42,5 +42,6 @@ signal_sources_config = {
         ]}
     ],
     
-    'mqtt_broker_host' : 'holger-gb-15x'
+    'mqtt_broker_host' : 'holger-gb-15x',
+    'web_app_port' : 5000
 }
