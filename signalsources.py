@@ -138,7 +138,7 @@ class DeltaSource(SignalSource):
         if self._value_a == self.STATUS_MISSING or self._value_b == self.STATUS_MISSING:
             self._send(0, self.STATUS_MISSING)
         else:
-            self._send(self._value_a - self._value_b, self.STATUS_OK)
+            self._send(self._value_a.value - self._value_b.value, self.STATUS_OK)
 
     def start(self, *args):
         super().start(*args)
