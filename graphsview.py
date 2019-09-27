@@ -110,7 +110,8 @@ class GraphsScreen(GestureDetector):
             group_label = group['label']
             for source in group['sources']:
                 self.graph_labels.append(group_label + ' ' + source.label)
-                self.history.add_source(source)
+                if source.with_history:
+                    self.history.add_source(source)
                 self.graph_visible.append(source.with_graph)
                 plot = SmoothLinePlot(color=source.color)
                 self.plots.append(plot)

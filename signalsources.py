@@ -31,13 +31,14 @@ class SignalSource:
     
     SEND_MIN_DELTA = 0.5
    
-    def __init__(self, label='Value', unit='', value_format='{:.1f}', color=[0.6, 0.6, 0.6, 1.0], z_order=0, with_graph=True):
+    def __init__(self, label='Value', unit='', value_format='{:.1f}', color=[0.6, 0.6, 0.6, 1.0], z_order=0, with_graph=True, with_history=True):
         self.label = label
         self.unit = unit
         self.value_format = value_format
         self.color = color
         self.z_order = z_order
         self.with_graph = with_graph
+        self.with_history = with_history
         self.callbacks = []
         self.last_sent = None
         self.last_value = None
@@ -109,6 +110,41 @@ class TestSource(SignalSource):
     def stop(self, *args):
         super().stop(*args)
         self._timer.cancel()
+
+
+class DeltaSource(SignalSource):
+    """
+    Signal source that calculates the delta between two other signals.
+    """
+
+    def __init__(self, signal_a, signal_b, **kwargs):
+        super().__init__(**kwargs)
+        self.signal_a = signal_a
+        self.signal_b = signal_b
+        self.signal_a.add_callback(self._a_updated)
+        self.signal_b.add_callback(self._b_updated)
+        self._value_a = self.STATUS_MISSING
+        self._value_b = self.STATUS_MISSING
+        
+    def _a_updated(self, value):
+        self._value_a = value
+        self._send_value()
+
+    def _b_updated(self, value):
+        self._value_b = value
+        self._send_value()
+        
+    def _send_value(self):
+        if self._value_a == self.STATUS_MISSING or self._value_b == self.STATUS_MISSING:
+            self._send(0, self.STATUS_MISSING)
+        else:
+            self._send(self._value_a - self._value_b, self.STATUS_OK)
+
+    def start(self, *args):
+        super().start(*args)
+    
+    def stop(self, *args):
+        super().stop(*args)
 
  
 class TsicSource(SignalSource):
