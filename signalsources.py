@@ -31,14 +31,13 @@ class SignalSource:
     
     SEND_MIN_DELTA = 0.5
    
-    def __init__(self, label='Value', unit='', value_format='{:.1f}', color=[0.6, 0.6, 0.6, 1.0], z_order=0, with_graph=True, with_history=True):
+    def __init__(self, label='Value', unit='', value_format='{:.1f}', color=[0.6, 0.6, 0.6, 1.0], z_order=0, with_graph=True):
         self.label = label
         self.unit = unit
         self.value_format = value_format
         self.color = color
         self.z_order = z_order
         self.with_graph = with_graph
-        self.with_history = with_history
         self.callbacks = []
         self.last_sent = None
         self.last_value = None
