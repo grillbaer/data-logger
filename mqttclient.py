@@ -41,10 +41,13 @@ class MqttClient:
     
     def start(self):
         if not self.__started:
-            logger.info("Starting MQTT client for broker " + self.broker_host)
-            self.client.connect_async(self.broker_host)
-            self.client.loop_start()
-            self.__started = True
+            if self.broker_host == '':
+                logger.info("NOT starting MQTT client because of config with empty broker")
+            else:
+                logger.info("Starting MQTT client for broker " + self.broker_host)
+                self.client.connect_async(self.broker_host)
+                self.client.loop_start()
+                self.__started = True
         
     def stop(self):
         if self.__started:
