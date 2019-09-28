@@ -31,7 +31,7 @@ class SignalSource:
     
     SEND_MIN_DELTA = 0.5
    
-    def __init__(self, label='Value', unit='', value_format='{:.1f}', color=[0.6, 0.6, 0.6, 1.0], z_order=0, with_graph=True):
+    def __init__(self, label='Value', unit='', value_format='{:.1f}', color=[0.6, 0.6, 0.6, 1.0], z_order=0, with_graph=True, corr_offset=0.0):
         self.label = label
         self.unit = unit
         self.value_format = value_format
@@ -39,6 +39,7 @@ class SignalSource:
         self.z_order = z_order
         self.with_graph = with_graph
         self.callbacks = []
+        self.corr_offset = corr_offset
         self.last_sent = None
         self.last_value = None
     
@@ -75,7 +76,7 @@ class SignalSource:
     def _send(self, value, status):
         if self.running:
             timestamp = time.time()
-            self.last_value = SignalValue(value, status, timestamp)
+            self.last_value = SignalValue(value + self.corr_offset, status, timestamp)
             if self.last_sent is None or self.last_sent + SignalSource.SEND_MIN_DELTA <= timestamp:
                 self.last_sent = timestamp
                 for callback in self.callbacks:

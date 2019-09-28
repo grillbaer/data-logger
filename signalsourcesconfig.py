@@ -20,7 +20,7 @@ _wp_ww_vor   = TsicSource(pigpio_pi, 26,          label='Wasser Vorlauf',   unit
 _wp_rueck    = TsicSource(pigpio_pi, 12,          label='Rücklauf',         unit='°C', value_format='{:.1f}', color=[0.5, 0.1, 0.7, 1.0], z_order=1)
 _hz_vor      = Ds1820Source('10-000801f6dc25', 1, label='Heizung Vorlauf',  unit='°C', value_format='{:.1f}', color=[1.0, 0.6, 0.6, 1.0], z_order=2)
 _hz_rueck    = Ds1820Source('10-000801dd3975', 1, label='Heizung Rücklauf', unit='°C', value_format='{:.1f}', color=[0.7, 0.6, 1.0, 1.0], z_order=1)
-_ww_speicher = TsicSource(pigpio_pi, 19,          label='Wasser Speicher',  unit='°C', value_format='{:.1f}', color=[0.8, 0.7, 1.0, 1.0], z_order=-1)
+_ww_speicher = TsicSource(pigpio_pi, 19,          label='Wasser Speicher',  unit='°C', value_format='{:.1f}', color=[0.8, 0.7, 1.0, 1.0], z_order=-1, corr_offset=+2.5)
 _ww_zirk     = Ds1820Source('28-0000089a5063', 1, label='Zirkulation',      unit='°C', value_format='{:.1f}', color=[0.1, 0.6, 0.4, 1.0], z_order=-1)
 _lu_frisch   = Ds1820Source('28-000008656f81', 1, label='Frischluft',       unit='°C', value_format='{:.1f}', color=[0.2, 0.8, 1.0, 1.0], z_order=-1)
 _lu_fort     = Ds1820Source('10-000801dcfc0f', 1, label='Fortluft',         unit='°C', value_format='{:.1f}', color=[0.7, 0.3, 0.1, 1.0], z_order=-1)
