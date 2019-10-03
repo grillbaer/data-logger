@@ -267,4 +267,4 @@ class DigitalInSource(SignalSource):
         return self.text_1 if value != 0 else self.text_0
 
     def __repr__(self):
-        return super().__repr__() + ' gpio_bcm=' + self.gpio_bcm
+        return super().__repr__() + ' bcm_gpio=' + str(self.__gpio)
