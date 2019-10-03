@@ -240,7 +240,7 @@ class DigitalInSource(SignalSource):
         self.text_1 = text_1
         if self.pi.connected:
             self.pi.set_mode(self.gpio_bcm, pigpio.INPUT)
-            self.pi.set_pull_up_down(self.gpio, pigpio.PUD_OFF)
+            self.pi.set_pull_up_down(self.gpio_bcm, pigpio.PUD_OFF)
         else:
             raise PigpioNotConnectedError('pigpio.pi is not connected, input for gpio ' + str(gpio_bcm) + ' will not work')
         self._timer = RepeatTimer(interval, self._read_and_send_value)
