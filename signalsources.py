@@ -13,7 +13,8 @@ import random
 import re
 import time
 
-from tsic import TsicInputChannel
+import pigpio
+from tsic import TsicInputChannel, PigpioNotConnectedError
 from kivy.tests.test_clock import callback
 from utils import RepeatTimer
 
@@ -31,7 +32,14 @@ class SignalSource:
     
     SEND_MIN_DELTA = 0.5
    
-    def __init__(self, label='Value', unit='', value_format='{:.1f}', color=[0.6, 0.6, 0.6, 1.0], z_order=0, with_graph=True, corr_offset=0.0):
+    def __init__(self, 
+                 label='Value',
+                 unit='',
+                 value_format='{:.1f}',
+                 color=[0.6, 0.6, 0.6, 1.0],
+                 z_order=0,
+                 with_graph=True,
+                 corr_offset=0.0):
         self.label = label
         self.unit = unit
         self.value_format = value_format
@@ -85,6 +93,9 @@ class SignalSource:
                     except:
                         logger.exception('Exception from signal source callback ' + str(self))
 
+    def format(self, value):
+        return self.value_format.format(value)
+        
     def __repr__(self):
         return self.__class__.__name__
 
@@ -214,3 +225,46 @@ class Ds1820Source(SignalSource):
     def __repr__(self):
         return super().__repr__() + ' id=' + self.sensor_id
 
+
+class DigitalInSource(SignalSource):
+    """
+    Digital GPIO input signal source.
+    """
+     
+    def __init__(self, pigpio_pi, gpio_bcm, interval, text_0='off', text_1='on', **kwargs):
+        super().__init__(**kwargs)
+        self.pi = pigpio_pi
+        self.gpio_bcm = gpio_bcm
+        self.interval = interval
+        self.text_0 = text_0
+        self.text_1 = text_1
+        if self.pi.connected:
+            self.pi.set_mode(self.gpio_bcm, pigpio.INPUT)
+            self.pi.set_pull_up_down(self.gpio, pigpio.PUD_OFF)
+        else:
+            raise PigpioNotConnectedError('pigpio.pi is not connected, input for gpio ' + str(gpio_bcm) + ' will not work')
+        self._timer = RepeatTimer(interval, self._read_and_send_value)
+         
+    def start(self, *args):
+        super().start(*args)
+        self._timer.start()
+     
+    def stop(self, *args):
+        super().stop(*args)
+        self._timer.cancel()
+
+    def _read_and_send_value(self):
+        reading = self.read_once()
+        if not reading is None:
+            self._send(reading, self.STATUS_OK)
+        else:
+            self._send(0, self.STATUS_MISSING)
+
+    def read_once(self):
+        return self.pi.read(self.gpio_bcm) if self.pi.connected else None
+
+    def format(self, value):
+        return self.text_1 if value != 0 else self.text_0
+
+    def __repr__(self):
+        return super().__repr__() + ' gpio_bcm=' + self.gpio_bcm

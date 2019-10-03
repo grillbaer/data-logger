@@ -67,9 +67,9 @@ class MeasurementItem(BoxLayout):
         self.update_value(SignalValue(0, SignalSource.STATUS_MISSING, time.time()))
         self.source.add_callback(self.update_value)
 
-    @mainthread    
+    @mainthread
     def update_value(self, signal_value):
-        self.value = '---' if signal_value.status != SignalSource.STATUS_OK else self.source.value_format.format(signal_value.value)
+        self.value = '---' if signal_value.status != SignalSource.STATUS_OK else self.source.format(signal_value.value)
         self.stale = signal_value.value is None or signal_value.status != SignalSource.STATUS_OK
         if not self.stale:
             self.start_stale_timer()

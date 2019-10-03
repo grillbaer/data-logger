@@ -9,7 +9,7 @@ __license__ = 'Apache License 2.0'
 
 import pigpio
 
-from signalsources import TsicSource, Ds1820Source, DeltaSource
+from signalsources import TsicSource, Ds1820Source, DeltaSource, DigitalInSource
 
 pigpio_pi = pigpio.pi()
 
@@ -18,6 +18,7 @@ _quelle_aus    = Ds1820Source('28-000008640446', 1, label='Quelle aus',        u
 _wp_hz_vor     = Ds1820Source('10-000801dd3c70', 1, label='Heizung Vorlauf',   unit='°C', value_format='{:.1f}', color=[1.0, 0.0, 0.0, 1.0], z_order=2)
 _wp_ww_vor     = TsicSource(pigpio_pi, 26,          label='Wasser Vorlauf',    unit='°C', value_format='{:.1f}', color=[0.2, 0.3, 0.9, 1.0], z_order=0)
 _wp_rueck      = TsicSource(pigpio_pi, 12,          label='Rücklauf',          unit='°C', value_format='{:.1f}', color=[0.5, 0.1, 0.7, 1.0], z_order=1)
+_wp_mode       = DigitalInSource(pigpio_pi, 5,   1, label='Modus',             unit='',   text_0='HZ', text_1='WW')
 _hz_vor        = Ds1820Source('10-000801f6dc25', 1, label='Heizung Vorlauf',   unit='°C', value_format='{:.1f}', color=[1.0, 0.6, 0.6, 1.0], z_order=2)
 _hz_rueck      = Ds1820Source('10-000801dd3975', 1, label='Heizung Rücklauf',  unit='°C', value_format='{:.1f}', color=[0.7, 0.6, 1.0, 1.0], z_order=1)
 _ww_speicher_o = TsicSource(pigpio_pi, 19,          label='Wasser oben',       unit='°C', value_format='{:.1f}', color=[0.8, 0.7, 1.0, 1.0], z_order=-1, corr_offset=+2.5)
@@ -36,6 +37,7 @@ signal_sources_config = {
             _quelle_aus,
             DeltaSource(_quelle_ein, _quelle_aus, label='\u0394 Quelle',      unit='K',  value_format='{:.1f}', color=[0.0, 0.0, 0.0, 1.0], with_graph = False),
             _wp_hz_vor,
+            _wp_mode,
             DeltaSource(_wp_hz_vor, _wp_rueck,    label='\u0394 Heizung',     unit='K',  value_format='{:.1f}', color=[0.0, 0.0, 0.0, 1.0], with_graph = False),
             _wp_ww_vor,
             DeltaSource(_wp_ww_vor, _wp_rueck,    label='\u0394 Wasser',      unit='K',  value_format='{:.1f}', color=[0.0, 0.0, 0.0, 1.0], with_graph = False),
