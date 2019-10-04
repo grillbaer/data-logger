@@ -1,0 +1,15 @@
+tsic
+psutil
+paho-mqtt
+docutils
+pygments
+pypiwin32
+kivy-deps-sdl2==0.1.22
+kivy-deps-glew==0.1.12
+kivy==1.11.1
+
+# install this manually AFTER other deps:
+#https://github.com/kivy-garden/graph/archive/master.zip
+
+# patch kivy/logger.py and comment out change of the kivy root logger like this:
+#logging.root = Logger

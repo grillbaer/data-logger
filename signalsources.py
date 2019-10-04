@@ -50,6 +50,7 @@ class SignalSource:
         self.corr_offset = corr_offset
         self.last_sent = None
         self.last_value = None
+        self.running = False
     
     def add_callback(self, callback):
         """
@@ -121,6 +122,32 @@ class TestSource(SignalSource):
     def stop(self, *args):
         super().stop(*args)
         self._timer.cancel()
+
+
+class TestDigitalSource(SignalSource):
+    """
+    Random test digital input signal source.
+    """
+
+    def __init__(self, interval, text_0='off', text_1='on', **kwargs):
+        super().__init__(**kwargs)
+        self.text_0 = text_0
+        self.text_1 = text_1
+        self._timer = RepeatTimer(interval, self._send_value)
+    
+    def _send_value(self):
+        self._send(random.choice([0, 1]), self.STATUS_OK)
+
+    def start(self, *args):
+        super().start(*args)
+        self._timer.start()
+    
+    def stop(self, *args):
+        super().stop(*args)
+        self._timer.cancel()
+    
+    def format(self, value):
+        return self.text_1 if value != 0 else self.text_0
 
 
 class DeltaSource(SignalSource):

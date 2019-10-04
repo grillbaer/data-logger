@@ -131,7 +131,7 @@ class GraphsScreen(GestureDetector):
         with self.history:
             if self.x_max is None:
                 now = time.time()
-                self.ids.graphs_canvas.xmax = now + self.history.delta_seconds
+                self.ids.graphs_canvas.xmax = now + 240 # workaround for cut-off right graph edge
                 self.ids.graphs_canvas.xmin = now - self.x_range
             else:
                 self.ids.graphs_canvas.xmax = self.x_max
