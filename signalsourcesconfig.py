@@ -11,6 +11,9 @@ import pigpio
 
 from signalsources import TsicSource, Ds1820Source, DeltaSource, DigitalInSource
 
+with open("secret-mqtt-password","r") as f:
+    mqtt_password = f.read().strip()
+
 pigpio_pi = pigpio.pi()
 
 _quelle_ein    = Ds1820Source('28-0000089b1ca2', 1, label='Quelle ein',        unit='°C', value_format='{:.1f}',    color=[0.5, 0.5, 1.0, 1.0], z_order=1)
@@ -67,5 +70,9 @@ signal_sources_config = {
         ]}
     ],
     
-    'mqtt_broker_host' : ''
+    'mqtt_broker_host' : 'homeserver.fritz.box',
+    'mqtt_broker_user' : 'user',
+    'mqtt_broker_password' : mqtt_password,
+    'mqtt_broker_base_topic' : 'home/heating/data-logger'
 }
+

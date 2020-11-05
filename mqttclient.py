@@ -24,6 +24,9 @@ class MqttClient:
     def __init__(self):
         # TODO use host name from settings
         self.broker_host = 'localhost'
+        self.broker_user = ''
+        self.broker_password = ''
+        self.broker_base_topic = 'datalogger'
         self.client = mqtt.Client()
         # self.client.enable_logger(logger)
         self.client.on_connect = self._on_connect
@@ -33,10 +36,13 @@ class MqttClient:
     
     def use_signals_config(self, signal_sources_config):
         self.broker_host = signal_sources_config['mqtt_broker_host']
+        self.broker_user = signal_sources_config['mqtt_broker_user']
+        self.broker_password = signal_sources_config['mqtt_broker_password']
+        self.broker_base_topic = signal_sources_config['mqtt_broker_base_topic']
         for group in signal_sources_config['groups']:
             group_label = group['label']
             for source in group['sources']:
-                topic = group_label + '/' + source.label
+                topic = self.broker_base_topic + '/' + group_label + '/' + source.label
                 source.add_callback(partial(self._publish_signal_value, topic, source.unit, source.value_format))
     
     def start(self):
@@ -45,6 +51,8 @@ class MqttClient:
                 logger.info("NOT starting MQTT client because of config with empty broker")
             else:
                 logger.info("Starting MQTT client for broker " + self.broker_host)
+                if self.broker_user != '':
+                    self.client.username_pw_set(self.broker_user, self.broker_password)
                 self.client.connect_async(self.broker_host)
                 self.client.loop_start()
                 self.__started = True
