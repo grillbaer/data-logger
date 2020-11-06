@@ -11,8 +11,11 @@ import pigpio
 
 from signalsources import TsicSource, Ds1820Source, DeltaSource, DigitalInSource
 
-with open("secret-mqtt-password","r") as f:
-    mqtt_password = f.read().strip()
+try:
+    with open("secret-mqtt-password", "r") as f:
+        mqtt_password = f.read().strip()
+except IOError:
+    mqtt_password = ''
 
 pigpio_pi = pigpio.pi()
 

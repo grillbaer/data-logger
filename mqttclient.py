@@ -22,7 +22,6 @@ class MqttClient:
     """
 
     def __init__(self):
-        # TODO use host name from settings
         self.broker_host = 'localhost'
         self.broker_user = ''
         self.broker_password = ''
@@ -68,8 +67,8 @@ class MqttClient:
         if self.__started:
             json_value = json.dumps({
                 'value': float(value_format.format(signal_value.value)),
-                'timestamp' : datetime.fromtimestamp(signal_value.timestamp).isoformat(),
-                'unit' : unit
+                'timestamp': datetime.fromtimestamp(signal_value.timestamp).isoformat(),
+                'unit': unit
             })
             self.client.publish(topic, json_value, 0, True)
         
