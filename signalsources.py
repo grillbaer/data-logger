@@ -32,7 +32,8 @@ class SignalSource:
     
     SEND_MIN_DELTA = 0.5
    
-    def __init__(self, 
+    def __init__(self,
+                 identifier,
                  label='Value',
                  unit='',
                  value_format='{:.1f}',
@@ -40,6 +41,7 @@ class SignalSource:
                  z_order=0,
                  with_graph=True,
                  corr_offset=0.0):
+        self.identifier = identifier
         self.label = label
         self.unit = unit
         self.value_format = value_format
@@ -106,8 +108,8 @@ class TestSource(SignalSource):
     Random test measurement signal source.
     """
 
-    def __init__(self, value, interval, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, identifier, value, interval, **kwargs):
+        super().__init__(identifier, **kwargs)
         self.value = value
         self.interval = interval
         self._timer = RepeatTimer(interval, self._send_value)
@@ -129,8 +131,8 @@ class TestDigitalSource(SignalSource):
     Random test digital input signal source.
     """
 
-    def __init__(self, interval, text_0='off', text_1='on', **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, identifier, interval, text_0='off', text_1='on', **kwargs):
+        super().__init__(identifier, **kwargs)
         self.text_0 = text_0
         self.text_1 = text_1
         self._timer = RepeatTimer(interval, self._send_value)
@@ -155,8 +157,8 @@ class DeltaSource(SignalSource):
     Signal source that calculates the delta between two other signals.
     """
 
-    def __init__(self, signal_a, signal_b, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, identifier, signal_a, signal_b, **kwargs):
+        super().__init__(identifier, **kwargs)
         self.signal_a = signal_a
         self.signal_b = signal_b
         self.signal_a.add_callback(self._a_updated)
@@ -190,8 +192,8 @@ class TsicSource(SignalSource):
     Temperature measurement signal source from TSIC 206/306 connected to GPIO.
     """
      
-    def __init__(self, pigpio_pi, gpio_bcm, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, identifier, pigpio_pi, gpio_bcm, **kwargs):
+        super().__init__(identifier, **kwargs)
         try:
             self.__gpio = gpio_bcm
             self.tsic = TsicInputChannel(pigpio_pi, gpio_bcm)
@@ -219,8 +221,8 @@ class Ds1820Source(SignalSource):
     Temperature measurement signal source from DS18x20 connected to W1 bus GPIO.
     """
      
-    def __init__(self, sensor_id, interval, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, identifier, sensor_id, interval, **kwargs):
+        super().__init__(identifier, **kwargs)
         self.sensor_id = sensor_id
         self._timer = RepeatTimer(interval, self._read_and_send_value)
          
@@ -258,8 +260,8 @@ class DigitalInSource(SignalSource):
     Digital GPIO input signal source.
     """
      
-    def __init__(self, pigpio_pi, gpio_bcm, interval, text_0='off', text_1='on', **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, identifier, pigpio_pi, gpio_bcm, interval, text_0='off', text_1='on', **kwargs):
+        super().__init__(identifier, **kwargs)
         self.pi = pigpio_pi
         self.gpio_bcm = gpio_bcm
         self.interval = interval

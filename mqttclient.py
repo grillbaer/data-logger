@@ -39,9 +39,8 @@ class MqttClient:
         self.broker_password = signal_sources_config['mqtt_broker_password']
         self.broker_base_topic = signal_sources_config['mqtt_broker_base_topic']
         for group in signal_sources_config['groups']:
-            group_label = group['label']
             for source in group['sources']:
-                topic = self.broker_base_topic + '/' + group_label + '/' + source.label
+                topic = self.broker_base_topic + '/' + source.identifier
                 source.add_callback(partial(self._publish_signal_value, topic, source.unit, source.value_format))
     
     def start(self):
