@@ -27,7 +27,7 @@ class SignalSource:
     """
     Common signal source for measurement values.
     """
-    STATUS_OK = ''
+    STATUS_OK = 'ok'
     STATUS_MISSING = 'missing'
     
     SEND_MIN_DELTA = 0.5
@@ -115,7 +115,7 @@ class TestSource(SignalSource):
         self._timer = RepeatTimer(interval, self._send_value)
     
     def _send_value(self):
-        self._send(random.gauss(self.value, 2), self.STATUS_OK)
+        self._send(round(random.gauss(self.value, 2), 3), self.STATUS_OK)
         
     def start(self, *args):
         super().start(*args)
@@ -178,7 +178,7 @@ class DeltaSource(SignalSource):
         if self._value_a == self.STATUS_MISSING or self._value_b == self.STATUS_MISSING:
             self._send(0, self.STATUS_MISSING)
         else:
-            self._send(self._value_a.value - self._value_b.value, self.STATUS_OK)
+            self._send(round(self._value_a.value - self._value_b.value, 3), self.STATUS_OK)
 
     def start(self, *args):
         super().start(*args)
@@ -205,7 +205,7 @@ class TsicSource(SignalSource):
     def start(self, *args):
         super().start(*args)
         if not self.tsic is None:
-            self.tsic.start(lambda m: self._send(m.degree_celsius, self.STATUS_OK))
+            self.tsic.start(lambda m: self._send(round(m.degree_celsius, 3), self.STATUS_OK))
      
     def stop(self, *args):
         super().stop(*args)
@@ -237,7 +237,7 @@ class Ds1820Source(SignalSource):
     def _read_and_send_value(self):
         temp = self.read_once()
         if not temp is None:
-            self._send(temp, self.STATUS_OK)
+            self._send(round(temp, 3), self.STATUS_OK)
         
     def read_once(self):
         try:

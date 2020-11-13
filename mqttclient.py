@@ -13,6 +13,8 @@ from functools import partial
 
 import paho.mqtt.client as mqtt
 
+from signalsources import SignalSource, SignalValue
+
 logger = logging.getLogger().getChild(__name__) 
 
 
@@ -41,7 +43,7 @@ class MqttClient:
         for group in signal_sources_config['groups']:
             for source in group['sources']:
                 topic = self.broker_base_topic + '/' + source.identifier
-                source.add_callback(partial(self._publish_signal_value, topic, source.unit, source.value_format))
+                source.add_callback(partial(self._publish_signal_value, source))
     
     def start(self):
         if not self.__started:
@@ -62,12 +64,15 @@ class MqttClient:
             self.client.disconnect()
             self.client.loop_stop(True)
     
-    def _publish_signal_value(self, topic, unit, value_format, signal_value):
+    def _publish_signal_value(self, source, signal_value):
         if self.__started:
+            topic = self.broker_base_topic + '/' + source.identifier
             json_value = json.dumps({
-                'value': float(value_format.format(signal_value.value)),
+                'value':     signal_value.value,
+                'status':    signal_value.status,
+                'formatted': '---' if signal_value.status != SignalSource.STATUS_OK else source.format(signal_value.value),
                 'timestamp': datetime.fromtimestamp(signal_value.timestamp).isoformat(),
-                'unit': unit
+                'unit':      source.unit
             })
             self.client.publish(topic, json_value, 0, True)
         
