@@ -10,10 +10,12 @@ It contains some icons from [Flaticon](https://www.flaticon.com/), license [Crea
 
 ### Current Temperatures
 Show the current readings:
+
 ![Measurements View](screenshots/measurements.png)
 
 ### Temperature Graphs
 Show how temperatures developed over the last 24 hours:
+
 ![Graphs View](screenshots/graphs.png)
 
 ### MQTT Client
