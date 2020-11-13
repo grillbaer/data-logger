@@ -20,7 +20,7 @@ Show how temperatures developed over the last 24 hours:
 Publish all temperature readings to a MQTT broker. This allows to track and show them in common MQTT apps.
 The MQTT messages contain JSON with timestamp and value:
 
-    {"timestamp": "2018-03-10T16:53:11.335794", "unit": "\u00b0C", "value": 24.8}
+    { "status": "ok", "timestamp": "2020-11-13T17:08:57.753064", "value": 9.697, "unit": "°C", "formatted": "9.7" }
 
 ### CSV Logging
 The temperature readings are written to CSV files and held for 32 days. This also allows to immediately re-fill the graphs view after restart.
