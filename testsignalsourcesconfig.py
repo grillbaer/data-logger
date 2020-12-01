@@ -67,5 +67,7 @@ signal_sources_config = {
     'mqtt_broker_host' : '',
     'mqtt_broker_user' : '',
     'mqtt_broker_password' : '',
-    'mqtt_broker_base_topic' : 'data-logger'
+    'mqtt_broker_base_topic' : 'data-logger-test',
+    'mqtt_use_ssl' : True,
+    'mqtt_broker_cacerts' : 'cacerts.pem'
 }

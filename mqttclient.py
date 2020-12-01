@@ -29,6 +29,8 @@ class MqttClient:
         self.broker_host = 'localhost'
         self.broker_user = ''
         self.broker_password = ''
+        self.use_ssl = False
+        self.broker_cacerts = None
         self.broker_base_topic = 'datalogger'
         self.client = mqtt.Client()
         # self.client.enable_logger(logger)
@@ -44,6 +46,8 @@ class MqttClient:
         self.broker_host = signal_sources_config['mqtt_broker_host']
         self.broker_user = signal_sources_config['mqtt_broker_user']
         self.broker_password = signal_sources_config['mqtt_broker_password']
+        self.use_ssl = signal_sources_config['mqtt_use_ssl']
+        self.broker_cacerts = signal_sources_config['mqtt_broker_cacerts']
         self.broker_base_topic = signal_sources_config['mqtt_broker_base_topic']
         for group in signal_sources_config['groups']:
             for source in group['sources']:
@@ -57,6 +61,8 @@ class MqttClient:
                 logger.info("Starting MQTT client for broker " + self.broker_host)
                 if self.broker_user != '':
                     self.client.username_pw_set(self.broker_user, self.broker_password)
+                if self.use_ssl:
+                    self.client.tls_set(ca_certs=self.broker_cacerts)
                 self.client.connect_async(self.broker_host)
                 self.client.loop_start()
                 self.__timer = RepeatTimer(self.delta_seconds, self.publish)
