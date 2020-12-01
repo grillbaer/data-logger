@@ -75,7 +75,10 @@ signal_sources_config = {
     ],
     
     'mqtt_broker_host' : 'homeserver.fritz.box',
+    'mqtt_broker_port' : 8883,
     'mqtt_broker_user' : 'user',
     'mqtt_broker_password' : mqtt_password,
-    'mqtt_broker_base_topic' : 'home/heating/data-logger'
+    'mqtt_broker_base_topic' : 'home/heating/data-logger',
+    'mqtt_use_ssl': True,
+    'mqtt_broker_cacerts': 'mqtt_broker_cacert.pem'
 }

@@ -28,6 +28,7 @@ class MqttClient:
     def __init__(self):
         self.broker_host = 'localhost'
         self.broker_user = ''
+        self.broker_port = 1883
         self.broker_password = ''
         self.use_ssl = False
         self.broker_cacerts = None
@@ -44,6 +45,7 @@ class MqttClient:
     
     def use_signals_config(self, signal_sources_config):
         self.broker_host = signal_sources_config['mqtt_broker_host']
+        self.broker_port = signal_sources_config['mqtt_broker_port']
         self.broker_user = signal_sources_config['mqtt_broker_user']
         self.broker_password = signal_sources_config['mqtt_broker_password']
         self.use_ssl = signal_sources_config['mqtt_use_ssl']
@@ -63,7 +65,7 @@ class MqttClient:
                     self.client.username_pw_set(self.broker_user, self.broker_password)
                 if self.use_ssl:
                     self.client.tls_set(ca_certs=self.broker_cacerts)
-                self.client.connect_async(self.broker_host)
+                self.client.connect_async(self.broker_host, self.broker_port)
                 self.client.loop_start()
                 self.__timer = RepeatTimer(self.delta_seconds, self.publish)
                 self.__timer.start()

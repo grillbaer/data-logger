@@ -65,6 +65,7 @@ signal_sources_config = {
     ],
     
     'mqtt_broker_host' : '',
+    'mqtt_broker_port' : 1883,
     'mqtt_broker_user' : '',
     'mqtt_broker_password' : '',
     'mqtt_broker_base_topic' : 'data-logger-test',
