@@ -15,7 +15,6 @@ import time
 
 import pigpio
 from tsic import TsicInputChannel, PigpioNotConnectedError
-from kivy.tests.test_clock import callback
 from utils import RepeatTimer
 
 logger = logging.getLogger().getChild(__name__)
