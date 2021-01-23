@@ -1,4 +1,4 @@
 [Desktop Entry]
 Type=Application
-Name=Clock
+Name=Data-Logger
 Exec=/home/pi/data-logger/start.sh
