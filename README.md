@@ -101,8 +101,9 @@ mtdev_%(name)s = probesysfs,provider=mtdev
 hid_%(name)s = probesysfs,provider=hidinput
 ...
 
-# Display backlight access for pi
-sudo chmod a+w /sys/class/backlight/rpi_backlight/bl_power
+# Display backlight switch permissions for pi
+echo 'SUBSYSTEM=="backlight",RUN+="/bin/chmod 666 /sys/class/backlight/%k/brightness /sys/class/backlight/%k/bl_power"' | \
+  sudo tee /etc/udev/rules.d/backlight-permissions.rules
 
 # Disable regular screensaver in desktop preferences
 
