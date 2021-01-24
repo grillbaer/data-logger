@@ -57,7 +57,7 @@ Steps last performed on latest Raspbian of 2021-01-23
 
 # Desktop packages
 sudo apt update
-sudo api install lightdm lxsession 
+sudo apt install lightdm lxsession 
 
 # Basic config
 sudo raspi-config
@@ -88,7 +88,7 @@ sudo apt install pkg-config libgl1-mesa-dev libgles2-mesa-dev \
    xclip xsel libjpeg-dev
 sudo apt install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
 
-# Official Raspberry Pi 7" display multi-touch support and fullscreen
+# Official Raspberry Pi 7" display multi-touch and fullscreen
 # nano ~/.kivy/config.ini:
 [graphics]
 ...
@@ -111,8 +111,8 @@ echo 'SUBSYSTEM=="backlight",RUN+="/bin/chmod 666 /sys/class/backlight/%k/bright
 data-logger/start.sh
 
 # Autostart data-logger at desktop login
-mkdir -p .config/autostart
-ln -sf /home/pi/data-logger/data-logger.desktop .config/autostart/
+mkdir -p ~/.config/autostart
+ln -sf /home/pi/data-logger/data-logger.desktop ~/.config/autostart/
 
 # For data-logger configuration change data-logger/signalsourcesconfig.py,
 # you may use testsignalsourcesconfig.py for demo simulation
