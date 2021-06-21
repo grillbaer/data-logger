@@ -2,7 +2,7 @@
 <module type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="Python" name="Python">
-      <configuration sdkName="Python 3.9 (data-logger-3.9)" />
+      <configuration sdkName="Python 3.9 (data-logger)" />
     </facet>
   </component>
   <component name="NewModuleRootManager">
@@ -10,6 +10,6 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Python 3.9 (data-logger-3.9) interpreter library" level="application" />
+    <orderEntry type="library" name="Python 3.9 (data-logger) interpreter library" level="application" />
   </component>
 </module>

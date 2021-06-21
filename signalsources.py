@@ -7,14 +7,16 @@ __author__ = 'Holger Fleischmann'
 __copyright__ = 'Copyright 2018, Holger Fleischmann, Bavaria/Germany'
 __license__ = 'Apache License 2.0'
 
-from collections import namedtuple
 import logging
 import random
 import re
 import time
+from collections import namedtuple
+from typing import Callable, Any, Tuple
 
 import pigpio
 from tsic import TsicInputChannel, PigpioNotConnectedError
+
 from utils import RepeatTimer
 
 logger = logging.getLogger().getChild(__name__)
@@ -28,9 +30,9 @@ class SignalSource:
     """
     STATUS_OK = 'ok'
     STATUS_MISSING = 'missing'
-    
+
     SEND_MIN_DELTA = 0.5
-   
+
     def __init__(self,
                  identifier,
                  label='Value',
@@ -52,7 +54,7 @@ class SignalSource:
         self.last_sent = None
         self.last_value = None
         self.running = False
-    
+
     def add_callback(self, callback):
         """
         Add a callback to receive signal values as
@@ -63,7 +65,7 @@ class SignalSource:
 
     def remove_callback(self, callback):
         self.callbacks.remove(callback)
-        
+
     def start(self):
         """
         Start sending measurements to the callbacks.
@@ -73,7 +75,7 @@ class SignalSource:
         """
         logger.debug('Starting ' + str(self))
         self.running = True
-    
+
     def stop(self):
         """
         Stop sending measurements.
@@ -82,7 +84,7 @@ class SignalSource:
         """
         logger.debug('Stopping ' + str(self))
         self.running = False
-    
+
     def _send(self, value, status):
         if self.running:
             timestamp = time.time()
@@ -97,7 +99,7 @@ class SignalSource:
 
     def format(self, value):
         return self.value_format.format(value)
-        
+
     def __repr__(self):
         return self.__class__.__name__
 
@@ -112,14 +114,14 @@ class TestSource(SignalSource):
         self.value = value
         self.interval = interval
         self._timer = RepeatTimer(interval, self._send_value)
-    
+
     def _send_value(self):
         self._send(round(random.gauss(self.value, 2), 3), self.STATUS_OK)
-        
+
     def start(self, *args):
         super().start(*args)
         self._timer.start()
-    
+
     def stop(self, *args):
         super().stop(*args)
         self._timer.cancel()
@@ -135,18 +137,18 @@ class TestDigitalSource(SignalSource):
         self.text_0 = text_0
         self.text_1 = text_1
         self._timer = RepeatTimer(interval, self._send_value)
-    
+
     def _send_value(self):
         self._send(random.choice([0, 1]), self.STATUS_OK)
 
     def start(self, *args):
         super().start(*args)
         self._timer.start()
-    
+
     def stop(self, *args):
         super().stop(*args)
         self._timer.cancel()
-    
+
     def format(self, value):
         return self.text_1 if value != 0 else self.text_0
 
@@ -164,7 +166,7 @@ class DeltaSource(SignalSource):
         self.signal_b.add_callback(self._b_updated)
         self._value_a = self.STATUS_MISSING
         self._value_b = self.STATUS_MISSING
-        
+
     def _a_updated(self, value):
         self._value_a = value
         self._send_value()
@@ -172,7 +174,7 @@ class DeltaSource(SignalSource):
     def _b_updated(self, value):
         self._value_b = value
         self._send_value()
-        
+
     def _send_value(self):
         if self._value_a == self.STATUS_MISSING or self._value_b == self.STATUS_MISSING:
             self._send(0, self.STATUS_MISSING)
@@ -181,16 +183,38 @@ class DeltaSource(SignalSource):
 
     def start(self, *args):
         super().start(*args)
-    
+
     def stop(self, *args):
         super().stop(*args)
 
- 
+
+class MappingSource(SignalSource):
+    """
+    Signal source that maps its value from some other input.
+    """
+
+    def __init__(self, identifier, input_source, mapping_func: Callable[[Any, Any], Tuple[float, str]], **kwargs):
+        super().__init__(identifier, **kwargs)
+        self._input_source = input_source
+        self._input_source.add_callback(self._updated)
+        self._mapping_func = mapping_func
+
+    def _updated(self, input_value):
+        (mapped_value, status) = self._mapping_func(self._input_source, input_value)
+        self._send(mapped_value, status)
+
+    def start(self, *args):
+        super().start(*args)
+
+    def stop(self, *args):
+        super().stop(*args)
+
+
 class TsicSource(SignalSource):
     """
     Temperature measurement signal source from TSIC 206/306 connected to GPIO.
     """
-     
+
     def __init__(self, identifier, pigpio_pi, gpio_bcm, **kwargs):
         super().__init__(identifier, **kwargs)
         try:
@@ -200,12 +224,12 @@ class TsicSource(SignalSource):
             logger.warn('Failed to initialize TSIC input channel: ' + str(e))
             # handle missing GPIO access for windows development
             self.tsic = None
-         
+
     def start(self, *args):
         super().start(*args)
         if not self.tsic is None:
             self.tsic.start(lambda m: self._send(round(m.degree_celsius, 3), self.STATUS_OK))
-     
+
     def stop(self, *args):
         super().stop(*args)
         if not self.tsic is None:
@@ -214,21 +238,21 @@ class TsicSource(SignalSource):
     def __repr__(self):
         return super().__repr__() + ' bcm_gpio=' + str(self.__gpio)
 
- 
+
 class Ds1820Source(SignalSource):
     """
     Temperature measurement signal source from DS18x20 connected to W1 bus GPIO.
     """
-     
+
     def __init__(self, identifier, sensor_id, interval, **kwargs):
         super().__init__(identifier, **kwargs)
         self.sensor_id = sensor_id
         self._timer = RepeatTimer(interval, self._read_and_send_value)
-         
+
     def start(self, *args):
         super().start(*args)
         self._timer.start()
-     
+
     def stop(self, *args):
         super().stop(*args)
         self._timer.cancel()
@@ -237,7 +261,7 @@ class Ds1820Source(SignalSource):
         temp = self.read_once()
         if not temp is None:
             self._send(round(temp, 3), self.STATUS_OK)
-        
+
     def read_once(self):
         try:
             with open('/sys/bus/w1/devices/' + self.sensor_id + '/w1_slave', 'r') as file:
@@ -249,7 +273,7 @@ class Ds1820Source(SignalSource):
         except OSError:
             logger.warn("Failed to read DS1820 file for " + self.sensor_id)
         return None
-    
+
     def __repr__(self):
         return super().__repr__() + ' id=' + self.sensor_id
 
@@ -258,7 +282,7 @@ class DigitalInSource(SignalSource):
     """
     Digital GPIO input signal source.
     """
-     
+
     def __init__(self, identifier, pigpio_pi, gpio_bcm, interval, text_0='off', text_1='on', **kwargs):
         super().__init__(identifier, **kwargs)
         self.pi = pigpio_pi
@@ -270,13 +294,14 @@ class DigitalInSource(SignalSource):
             self.pi.set_mode(self.gpio_bcm, pigpio.INPUT)
             self.pi.set_pull_up_down(self.gpio_bcm, pigpio.PUD_OFF)
         else:
-            raise PigpioNotConnectedError('pigpio.pi is not connected, input for gpio ' + str(gpio_bcm) + ' will not work')
+            raise PigpioNotConnectedError(
+                'pigpio.pi is not connected, input for gpio ' + str(gpio_bcm) + ' will not work')
         self._timer = RepeatTimer(interval, self._read_and_send_value)
-         
+
     def start(self, *args):
         super().start(*args)
         self._timer.start()
-     
+
     def stop(self, *args):
         super().stop(*args)
         self._timer.cancel()

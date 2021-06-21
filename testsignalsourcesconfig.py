@@ -7,7 +7,10 @@ __author__ = 'Holger Fleischmann'
 __copyright__ = 'Copyright 2019, Holger Fleischmann, Bavaria/Germany'
 __license__ = 'Apache License 2.0'
 
-from signalsources import TestSource, TestDigitalSource, DeltaSource
+from powermeterapatorec3 import PowerMeterApatorEC3Repeating
+from signalsources import TestSource, TestDigitalSource, DeltaSource, MappingSource, SignalSource
+
+power_meter_heat = PowerMeterApatorEC3Repeating("COM5", 30)
 
 _quelle_ein    = TestSource(       'temp-from-well',          12.5,  1, label='Quelle ein',        unit='°C', value_format='{:.1f}',    color=[0.5, 0.5, 1.0, 1.0], z_order=1)
 _quelle_aus    = TestSource(       'temp-to-well',            10.3,  1, label='Quelle aus',        unit='°C', value_format='{:.1f}',    color=[0.0, 0.2, 1.0, 1.0], z_order=2)
@@ -25,6 +28,23 @@ _lu_fort       = TestSource(       'temp-air-exhaust',         8.7,  1, label='F
 _lu_zu         = TestSource(       'temp-air-supply',         21.2,  1, label='Zuluft',            unit='°C', value_format='{:.1f}',    color=[0.7, 0.8, 0.9, 1.0], z_order=0)
 _lu_ab         = TestSource(       'temp-air-return',         21.8,  1, label='Abluft',            unit='°C', value_format='{:.1f}',    color=[0.9, 0.6, 0.3, 1.0], z_order=0)
 _lu_aussen     = TestSource(       'temp-outdoor',              5.0,  1, label='Außentemperatur',    unit='°C', value_format='{:.1f}', color=[0.1, 0.5, 0.2, 1.0], z_order=1)
+
+_ht_leistung   = MappingSource(  'power-heat-high-tariff',   power_meter_heat,     label='Leistung HT',       unit='W',  value_format='{:.0f}',    color=[1.0, 1.0, 0.0, 1.0], with_graph=False,
+                                 mapping_func=lambda pmeter, r: (pmeter.high_power,
+                                                                 SignalSource.STATUS_OK if pmeter.success and pmeter.high_power is not None
+                                                                 else SignalSource.STATUS_MISSING))
+_nt_leistung   = MappingSource(  'power-heat-low-tariff',    power_meter_heat,     label='Leistung NT',       unit='W',  value_format='{:.0f}',    color=[0.5, 1.0, 0.0, 1.0], with_graph=False,
+                                 mapping_func=lambda pmeter, r: (pmeter.low_power,
+                                                                 SignalSource.STATUS_OK if pmeter.success and pmeter.low_power is not None
+                                                                 else SignalSource.STATUS_MISSING))
+_ht_reading    = MappingSource(  'reading-heat-high-tariff', power_meter_heat,     label='Stand HT',          unit='kWh',value_format='{:.1f}',    color=[1.0, 1.0, 0.0, 0.5], with_graph=False,
+                                 mapping_func=lambda pmeter, r: (r.consumption_high_sum_kwh,
+                                                                 SignalSource.STATUS_OK if r.consumption_high_sum_kwh is not None
+                                                                 else SignalSource.STATUS_MISSING))
+_nt_reading    = MappingSource(  'reading-heat-low-tariff', power_meter_heat,      label='Stand NT',          unit='kWh',value_format='{:.1f}',    color=[0.5, 1.0, 0.0, 0.5], with_graph=False,
+                                 mapping_func=lambda pmeter, r: (r.consumption_low_sum_kwh,
+                                                                 SignalSource.STATUS_OK if r.consumption_low_sum_kwh is not None
+                                                                 else SignalSource.STATUS_MISSING))
 
 signal_sources_config = {
     'groups' : [
@@ -61,6 +81,10 @@ signal_sources_config = {
             _lu_ab,
             DeltaSource('temp-air-supply-return-delta', _lu_ab, _lu_zu,           label='\u0394 Ab-Zu',       unit='K',  value_format='{:.1f}', color=[0.0, 0.0, 0.0, 1.0], with_graph = False),
             _lu_aussen,
+            _ht_leistung,
+            _nt_leistung,
+            _ht_reading,
+            _nt_reading,
         ]}
     ],
     
