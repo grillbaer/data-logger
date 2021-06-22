@@ -8,7 +8,7 @@ __license__ = 'Apache License 2.0'
 
 import logging
 import time
-from typing import NamedTuple, Optional, Callable
+from typing import NamedTuple, Optional, Callable, List
 
 import serial
 from serial import SEVENBITS, PARITY_EVEN, SerialException
@@ -162,7 +162,7 @@ class PowerMeterApatorEC3Repeating:
     low_power_from_ts: Optional[float]
     low_power_to_ts: Optional[float]
 
-    callbacks: list[Callable[[Optional[PowerMeterReading]], None]]
+    callbacks: List[Callable[[Optional[PowerMeterReading]], None]]
 
     def __init__(self, power_meter: PowerMeterApatorEC3, interval: float):
         self._power_meter = power_meter
