@@ -12,7 +12,7 @@ import random
 import re
 import time
 from collections import namedtuple
-from typing import Callable, Any, Tuple
+from typing import Callable, Any
 
 import pigpio
 from tsic import TsicInputChannel, PigpioNotConnectedError
@@ -87,10 +87,13 @@ class SignalSource:
 
     def _send(self, value, status):
         if self.running:
-            timestamp = time.time()
-            self.last_value = SignalValue(value + self.corr_offset, status, timestamp)
-            if self.last_sent is None or self.last_sent + SignalSource.SEND_MIN_DELTA <= timestamp:
-                self.last_sent = timestamp
+            self._send_signal_value(SignalValue(value + self.corr_offset, status, time.time()))
+
+    def _send_signal_value(self, signal_value: SignalValue):
+        if self.running:
+            self.last_value = signal_value
+            if self.last_sent is None or self.last_sent + SignalSource.SEND_MIN_DELTA <= signal_value.timestamp:
+                self.last_sent = signal_value.timestamp
                 for callback in self.callbacks:
                     try:
                         callback(self.last_value)
@@ -191,17 +194,20 @@ class DeltaSource(SignalSource):
 class MappingSource(SignalSource):
     """
     Signal source that maps its value from some other input.
+    The mapping function must map (input_source, input_value) -> SignalValue.
+    The input_source must have a method add_callback(callback_func(input_value)).
     """
 
-    def __init__(self, identifier, input_source, mapping_func: Callable[[Any, Any], Tuple[float, str]], **kwargs):
+    def __init__(self, identifier, input_source, mapping_func: Callable[[Any, Any], SignalValue],
+                 **kwargs):
         super().__init__(identifier, **kwargs)
         self._input_source = input_source
         self._input_source.add_callback(self._updated)
         self._mapping_func = mapping_func
 
     def _updated(self, input_value):
-        (mapped_value, status) = self._mapping_func(self._input_source, input_value)
-        self._send(mapped_value, status)
+        signal_value = self._mapping_func(self._input_source, input_value)
+        self._send_signal_value(signal_value)
 
     def start(self, *args):
         super().start(*args)

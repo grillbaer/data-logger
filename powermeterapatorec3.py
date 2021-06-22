@@ -153,12 +153,14 @@ class PowerMeterApatorEC3Repeating:
     success: bool
 
     _prev_high: Optional[float]
-    _prev_high_ts: Optional[float]
     high_power: Optional[float]
+    high_power_from_ts: Optional[float]
+    high_power_to_ts: Optional[float]
 
     _prev_low: Optional[float]
-    _prev_low_ts: Optional[float]
     low_power: Optional[float]
+    low_power_from_ts: Optional[float]
+    low_power_to_ts: Optional[float]
 
     callbacks: list[Callable[[Optional[PowerMeterReading]], None]]
 
@@ -169,11 +171,13 @@ class PowerMeterApatorEC3Repeating:
         self.reading_ts = None
         self.success = False
         self._prev_high = None
-        self._prev_high_ts = None
         self.high_power = None
+        self.high_power_from_ts = None
+        self.high_power_to_ts = None
         self._prev_low = None
-        self._prev_low_ts = None
         self.low_power = None
+        self.high_power_from_ts = None
+        self.high_power_to_ts = None
         self.callbacks = []
 
     def add_callback(self, callback: Callable[[Optional[PowerMeterReading]], None]):
@@ -202,20 +206,22 @@ class PowerMeterApatorEC3Repeating:
                 and self._prev_low != self.reading.consumption_low_sum_kwh:
             if self._prev_low is not None:
                 self.low_power = (self.reading.consumption_low_sum_kwh - self._prev_low) * 3.6e6 / \
-                                 (self.reading_ts - self._prev_low_ts)
+                                 (self.reading_ts - self.low_power_to_ts)
+                self.low_power_from_ts = self.low_power_to_ts
                 self.high_power = 0
-            self._prev_low_ts = self.reading_ts
             self._prev_low = self.reading.consumption_low_sum_kwh
+            self.low_power_to_ts = self.reading_ts
 
     def _update_high_power(self):
         if self.reading.consumption_high_sum_kwh is not None \
                 and self._prev_high != self.reading.consumption_high_sum_kwh:
             if self._prev_high is not None:
                 self.high_power = (self.reading.consumption_high_sum_kwh - self._prev_high) * 3.6e6 / \
-                                  (self.reading_ts - self._prev_high_ts)
+                                  (self.reading_ts - self.high_power_to_ts)
+                self.high_power_from_ts = self.high_power_to_ts
                 self.low_power = 0
-            self._prev_high_ts = self.reading_ts
             self._prev_high = self.reading.consumption_high_sum_kwh
+            self.high_power_to_ts = self.reading_ts
 
     def _fire(self):
         for callback in self.callbacks:
