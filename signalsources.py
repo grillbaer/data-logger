@@ -207,6 +207,8 @@ class MappingSource(SignalSource):
 
     def _updated(self, input_value):
         signal_value = self._mapping_func(self._input_source, input_value)
+        if signal_value.timestamp is None:
+            signal_value.timestamp = time.time()
         self._send_signal_value(signal_value)
 
     def start(self, *args):

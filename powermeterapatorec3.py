@@ -176,8 +176,8 @@ class PowerMeterApatorEC3Repeating:
         self.high_power_to_ts = None
         self._prev_low = None
         self.low_power = None
-        self.high_power_from_ts = None
-        self.high_power_to_ts = None
+        self.low_power_from_ts = None
+        self.low_power_to_ts = None
         self.callbacks = []
 
     def add_callback(self, callback: Callable[[Optional[PowerMeterReading]], None]):
