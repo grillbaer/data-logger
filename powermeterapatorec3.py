@@ -184,7 +184,8 @@ class PowerMeterApatorEC3Repeating:
         self.callbacks.append(callback)
 
     def start(self):
-        self._timer.start()
+        if not self._timer.is_alive():
+            self._timer.start()
 
     def stop(self):
         self._timer.cancel()

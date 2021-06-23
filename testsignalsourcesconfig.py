@@ -7,10 +7,10 @@ __author__ = 'Holger Fleischmann'
 __copyright__ = 'Copyright 2019, Holger Fleischmann, Bavaria/Germany'
 __license__ = 'Apache License 2.0'
 
-from powermeterapatorec3 import PowerMeterApatorEC3Repeating
+from powermeterapatorec3 import PowerMeterApatorEC3Repeating, PowerMeterApatorEC3
 from signalsources import TestSource, TestDigitalSource, DeltaSource, MappingSource, SignalSource, SignalValue
 
-power_meter_heat = PowerMeterApatorEC3Repeating("COM5", 30)
+power_meter_heat = PowerMeterApatorEC3Repeating(PowerMeterApatorEC3("COM5"), 30)
 
 _quelle_ein    = TestSource(       'temp-from-well',          12.5,  1, label='Quelle ein',        unit='°C', value_format='{:.1f}',    color=[0.5, 0.5, 1.0, 1.0], z_order=1)
 _quelle_aus    = TestSource(       'temp-to-well',            10.3,  1, label='Quelle aus',        unit='°C', value_format='{:.1f}',    color=[0.0, 0.2, 1.0, 1.0], z_order=2)
@@ -32,11 +32,11 @@ _lu_aussen     = TestSource(       'temp-outdoor',             5.0,  1, label='A
 _ht_leistung   = MappingSource(  'power-heat-high-tariff',   power_meter_heat,     label='Leistung HT',       unit='W',  value_format='{:.0f}',    color=[0.9, 0.4, 0.1, 1.0], with_graph=False,
                                  mapping_func=lambda pmeter, reading: SignalValue(pmeter.high_power,
                                                                                   SignalSource.STATUS_OK if pmeter.success and pmeter.high_power is not None else SignalSource.STATUS_MISSING,
-                                                                                  pmeter.high_power_begin_ts))
+                                                                                  pmeter.high_power_from_ts))
 _nt_leistung   = MappingSource(  'power-heat-low-tariff',    power_meter_heat,     label='Leistung NT',       unit='W',  value_format='{:.0f}',    color=[0.2, 0.3, 0.9, 1.0], with_graph=False,
                                  mapping_func=lambda pmeter, reading: SignalValue(pmeter.low_power,
                                                                                   SignalSource.STATUS_OK if pmeter.success and pmeter.low_power is not None else SignalSource.STATUS_MISSING,
-                                                                                  pmeter.low_power_begin_ts))
+                                                                                  pmeter.low_power_from_ts))
 _ht_reading    = MappingSource(  'reading-heat-high-tariff', power_meter_heat,     label='Stand HT',          unit='kWh',value_format='{:.1f}',    color=[0.9, 0.4, 0.1, 0.5], with_graph=False,
                                  mapping_func=lambda pmeter, reading: SignalValue(reading.consumption_high_sum_kwh,
                                                                                   SignalSource.STATUS_OK if reading.consumption_high_sum_kwh is not None else SignalSource.STATUS_MISSING,

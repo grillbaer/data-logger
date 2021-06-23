@@ -195,7 +195,7 @@ class MappingSource(SignalSource):
     """
     Signal source that maps its value from some other input.
     The mapping function must map (input_source, input_value) -> SignalValue.
-    The input_source must have a method add_callback(callback_func(input_value)).
+    The input_source must have a method add_callback(callback_func(input_value)) and a start() method.
     """
 
     def __init__(self, identifier, input_source, mapping_func: Callable[[Any, Any], SignalValue],
@@ -211,6 +211,7 @@ class MappingSource(SignalSource):
 
     def start(self, *args):
         super().start(*args)
+        self._input_source.start()
 
     def stop(self, *args):
         super().stop(*args)
