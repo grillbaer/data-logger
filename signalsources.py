@@ -41,6 +41,8 @@ class SignalSource:
                  color=[0.6, 0.6, 0.6, 1.0],
                  z_order=0,
                  with_graph=True,
+                 small=False,
+                 stale_secs=10,
                  corr_offset=0.0):
         self.identifier = identifier
         self.label = label
@@ -49,6 +51,8 @@ class SignalSource:
         self.color = color
         self.z_order = z_order
         self.with_graph = with_graph
+        self.small = small
+        self.stale_secs = stale_secs
         self.callbacks = []
         self.corr_offset = corr_offset
         self.last_sent = None

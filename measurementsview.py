@@ -55,6 +55,7 @@ class MeasurementItem(BoxLayout):
     value = StringProperty()
     unit = StringProperty()
     stale = BooleanProperty(False)
+    small = BooleanProperty(False)
     signal_color = ListProperty()
 
     def __init__(self, source, **kwargs):
@@ -63,6 +64,7 @@ class MeasurementItem(BoxLayout):
         self.label = source.label
         self.unit = source.unit
         self.signal_color = source.color
+        self.small = source.small
         self.stale_clock = None
         self.update_value(SignalValue(0, SignalSource.STATUS_MISSING, time.time()))
         self.source.add_callback(self.update_value)
@@ -80,7 +82,7 @@ class MeasurementItem(BoxLayout):
 
     def start_stale_timer(self):
         self.stop_stale_timer()
-        self.stale_clock = Clock.schedule_once(self.mark_stale, 10)
+        self.stale_clock = Clock.schedule_once(self.mark_stale, self.source.stale_secs)
         
     def stop_stale_timer(self):
         if not self.stale_clock is None:

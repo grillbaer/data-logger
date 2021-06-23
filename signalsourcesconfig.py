@@ -40,19 +40,19 @@ _lu_zu         = TsicSource(     'temp-air-supply',          pigpio_pi, 16,     
 _lu_ab         = TsicSource(     'temp-air-return',          pigpio_pi, 20,        label='Abluft',            unit='°C', value_format='{:.1f}',    color=[0.9, 0.6, 0.3, 1.0], z_order=0)
 _lu_aussen     = TsicSource(     'temp-outdoor',             pigpio_pi, 21,        label='Außentemperatur',   unit='°C', value_format='{:.1f}',    color=[0.1, 0.5, 0.2, 1.0], z_order=1)
 
-_ht_leistung   = MappingSource(  'power-heat-high-tariff',   power_meter_heat,     label='Leistung HT',       unit='W',  value_format='{:.0f}',    color=[0.9, 0.4, 0.1, 1.0], with_graph=False,
+_ht_leistung   = MappingSource(  'power-heat-high-tariff',   power_meter_heat,     label='Leistung HT',       unit='W',  value_format='{:.0f}',    color=[0.9, 0.4, 0.1, 1.0], with_graph=False, stale_secs=60,
                                  mapping_func=lambda pmeter, reading: SignalValue(pmeter.high_power,
                                                                                   SignalSource.STATUS_OK if pmeter.success and pmeter.high_power is not None else SignalSource.STATUS_MISSING,
                                                                                   pmeter.high_power_from_ts))
-_nt_leistung   = MappingSource(  'power-heat-low-tariff',    power_meter_heat,     label='Leistung NT',       unit='W',  value_format='{:.0f}',    color=[0.2, 0.3, 0.9, 1.0], with_graph=False,
+_nt_leistung   = MappingSource(  'power-heat-low-tariff',    power_meter_heat,     label='Leistung NT',       unit='W',  value_format='{:.0f}',    color=[0.2, 0.3, 0.9, 1.0], with_graph=False, stale_secs=60,
                                  mapping_func=lambda pmeter, reading: SignalValue(pmeter.low_power,
                                                                                   SignalSource.STATUS_OK if pmeter.success and pmeter.low_power is not None else SignalSource.STATUS_MISSING,
                                                                                   pmeter.low_power_from_ts))
-_ht_reading    = MappingSource(  'reading-heat-high-tariff', power_meter_heat,     label='Stand HT',          unit='kWh',value_format='{:.1f}',    color=[0.9, 0.4, 0.1, 0.5], with_graph=False,
+_ht_reading    = MappingSource(  'reading-heat-high-tariff', power_meter_heat,     label='Stand HT',          unit='kWh',value_format='{:.1f}',    color=[0.9, 0.4, 0.1, 0.5], with_graph=False, stale_secs=60, small=True,
                                  mapping_func=lambda pmeter, reading: SignalValue(reading.consumption_high_sum_kwh,
                                                                                   SignalSource.STATUS_OK if reading.consumption_high_sum_kwh is not None else SignalSource.STATUS_MISSING,
                                                                                   pmeter.reading_ts))
-_nt_reading    = MappingSource(  'reading-heat-low-tariff', power_meter_heat,      label='Stand NT',          unit='kWh',value_format='{:.1f}',    color=[0.2, 0.3, 0.9, 0.5], with_graph=False,
+_nt_reading    = MappingSource(  'reading-heat-low-tariff', power_meter_heat,      label='Stand NT',          unit='kWh',value_format='{:.1f}',    color=[0.2, 0.3, 0.9, 0.5], with_graph=False, stale_secs=60, small=True,
                                  mapping_func=lambda pmeter, reading: SignalValue(reading.consumption_low_sum_kwh,
                                                                                   SignalSource.STATUS_OK if reading.consumption_low_sum_kwh is not None else SignalSource.STATUS_MISSING,
                                                                                   pmeter.reading_ts))
