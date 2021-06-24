@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from powermeterapatorec3 import PowerMeterReading, PowerMeterApatorEC3Repeating
+from powermeterapatorec3 import PowerMeterReading, PowerMeterApatorEC3Repeating, PowerMeterApatorEC3
 
 
 class MockPowerMeterApatorEC3:
@@ -12,6 +12,16 @@ class MockPowerMeterApatorEC3:
 
     def read(self):
         return PowerMeterReading(False, None, None, None)
+
+
+class TestPowerMeterApatorEC3(TestCase):
+    def test__parse_line_str(self):
+        pm = PowerMeterApatorEC3("none")
+        self.assertEqual("008482.46", pm._parse_line_str("1.8.1*00(008482.46)  "))
+
+    def test__parse_(self):
+        pm = PowerMeterApatorEC3("none")
+        self.assertEqual(8482.46, pm._parse_line_float("1.8.1*00(008482.46)  "))
 
 
 class TestPowerMeterApatorEC3Repeating(TestCase):

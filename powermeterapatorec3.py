@@ -131,7 +131,7 @@ class PowerMeterApatorEC3:
 
     def _parse_line_str(self, cleaned_line: str) -> Optional[str]:
         begin = cleaned_line.find("(") + 1
-        end = cleaned_line.rfind(")") - 1
+        end = cleaned_line.rfind(")")
         if begin != -1 and end != -1:
             return cleaned_line[begin:end]
         else:
