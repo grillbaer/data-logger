@@ -198,6 +198,7 @@ class PowerMeterApatorEC3Repeating:
             self.reading_ts = ts
             self._update_high_power()
             self._update_low_power()
+            self.success = True
         except SerialException:
             self.success = False
         self._fire()
