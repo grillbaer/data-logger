@@ -33,94 +33,106 @@ class TestPowerMeterApatorEC3Repeating(TestCase):
         self.pm.reading = PowerMeterReading(False, None, None, None)
         self.pm._update_high_power()
         self.pm._update_low_power()
-        self.assertIsNone(self.pm.high_power)
+        self.assertIsNone(self.pm.high.power)
+
+        self.pm.reading_ts = 1e9
+        self.pm.reading = PowerMeterReading(True, 3000, 1999.9, 1000)
+        self.pm._update_high_power()
+        self.pm._update_low_power()
+        self.assertIsNone(self.pm.high.power)
 
         self.pm.reading_ts = 1e9
         self.pm.reading = PowerMeterReading(True, 3000, 2000, 1000)
         self.pm._update_high_power()
         self.pm._update_low_power()
-        self.assertIsNone(self.pm.high_power)
+        self.assertIsNone(self.pm.high.power)
 
         self.pm.reading_ts = 1e9 + 3600
         self.pm.reading = PowerMeterReading(True, 3000, 2000.1, 1000)
         self.pm._update_high_power()
         self.pm._update_low_power()
-        self.assertAlmostEqual(self.pm.high_power, 100.)
+        self.assertAlmostEqual(self.pm.high.power, 100.)
 
         self.pm.reading_ts += 600
         self.pm.reading = PowerMeterReading(True, 3000, 2000.1, 1000)
-        self.pm.low_power = 123
+        self.pm.low.power = 123
         self.pm._update_high_power()
         self.pm._update_low_power()
-        self.assertAlmostEqual(self.pm.high_power, 100.)
-        self.assertEqual(self.pm.low_power, 123)
+        self.assertAlmostEqual(self.pm.high.power, 100.)
+        self.assertEqual(self.pm.low.power, 123)
 
         self.pm.reading_ts += 600
         self.pm.reading = PowerMeterReading(True, 3000, 2000.2, 1000)
         self.pm._update_high_power()
         self.pm._update_low_power()
-        self.assertAlmostEqual(self.pm.high_power, 300.)
+        self.assertAlmostEqual(self.pm.high.power, 300.)
 
         self.pm.reading_ts += 100
         self.pm.reading = PowerMeterReading(False, None, None, None)
         self.pm._update_high_power()
         self.pm._update_low_power()
-        self.assertAlmostEqual(self.pm.high_power, 300.)
+        self.assertAlmostEqual(self.pm.high.power, 300.)
 
         self.pm.reading_ts += 500
         self.pm.reading = PowerMeterReading(True, 3000, 2001.2, 1000)
-        self.pm.low_power = 123
+        self.pm.low.power = 123
         self.pm._update_high_power()
         self.pm._update_low_power()
-        self.assertAlmostEqual(self.pm.high_power, 3600 * 1000 / 600.)
-        self.assertEqual(self.pm.low_power, 0)
+        self.assertAlmostEqual(self.pm.high.power, 3600 * 1000 / 600.)
+        self.assertEqual(self.pm.low.power, 0)
 
     def test_update_low_power(self):
         self.pm.reading_ts = 1e9
         self.pm.reading = PowerMeterReading(False, None, None, None)
         self.pm._update_high_power()
         self.pm._update_low_power()
-        self.assertIsNone(self.pm.low_power)
+        self.assertIsNone(self.pm.low.power)
+
+        self.pm.reading_ts = 1e9
+        self.pm.reading = PowerMeterReading(True, 3000, 2000, 999.9)
+        self.pm._update_high_power()
+        self.pm._update_low_power()
+        self.assertIsNone(self.pm.low.power)
 
         self.pm.reading_ts = 1e9
         self.pm.reading = PowerMeterReading(True, 3000, 2000, 1000)
         self.pm._update_high_power()
         self.pm._update_low_power()
-        self.assertIsNone(self.pm.low_power)
+        self.assertIsNone(self.pm.low.power)
 
         self.pm.reading_ts = 1e9 + 3600
         self.pm.reading = PowerMeterReading(True, 3000, 2000, 1000.1)
         self.pm._update_high_power()
         self.pm._update_low_power()
-        self.assertAlmostEqual(self.pm.low_power, 100.)
+        self.assertAlmostEqual(self.pm.low.power, 100.)
 
         self.pm.reading_ts += 600
         self.pm.reading = PowerMeterReading(True, 3000, 2000, 1000.1)
-        self.pm.high_power = 123
+        self.pm.high.power = 123
         self.pm._update_high_power()
         self.pm._update_low_power()
-        self.assertAlmostEqual(self.pm.low_power, 100.)
-        self.assertEqual(self.pm.high_power, 123)
+        self.assertAlmostEqual(self.pm.low.power, 100.)
+        self.assertEqual(self.pm.high.power, 123)
 
         self.pm.reading_ts += 600
         self.pm.reading = PowerMeterReading(True, 3000, 2000, 1000.2)
         self.pm._update_high_power()
         self.pm._update_low_power()
-        self.assertAlmostEqual(self.pm.low_power, 300.)
+        self.assertAlmostEqual(self.pm.low.power, 300.)
 
         self.pm.reading_ts += 100
         self.pm.reading = PowerMeterReading(False, None, None, None)
         self.pm._update_high_power()
         self.pm._update_low_power()
-        self.assertAlmostEqual(self.pm.low_power, 300.)
+        self.assertAlmostEqual(self.pm.low.power, 300.)
 
         self.pm.reading_ts += 500
         self.pm.reading = PowerMeterReading(True, 3000, 2000, 1001.2)
-        self.pm.high_power = 123
+        self.pm.high.power = 123
         self.pm._update_high_power()
         self.pm._update_low_power()
-        self.assertAlmostEqual(self.pm.low_power, 3600 * 1000 / 600.)
-        self.assertEqual(self.pm.high_power, 0)
+        self.assertAlmostEqual(self.pm.low.power, 3600 * 1000 / 600.)
+        self.assertEqual(self.pm.high.power, 0)
 
 
 if __name__ == '__main__':

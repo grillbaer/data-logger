@@ -2,6 +2,8 @@
 Communication with APATOR EC3 power meter to get its actual readings.
 """
 
+from __future__ import annotations
+
 __author__ = 'Holger Fleischmann'
 __copyright__ = 'Copyright 2021, Holger Fleischmann, Bavaria/Germany'
 __license__ = 'Apache License 2.0'
@@ -144,6 +146,35 @@ class PowerMeterApatorEC3:
             return None
 
 
+class SingleCounter:
+    _prev_reading: Optional[float]
+    _prev_was_edge: bool
+    power: Optional[float]
+    power_from_ts: Optional[float]
+    power_to_ts: Optional[float]
+
+    def __init__(self):
+        self._prev_reading = None
+        self._prev_was_edge = False
+        self.power = None
+        self.power_from_ts = None
+        self.power_to_ts = None
+
+    def update(self, reading_kwh: Optional[float], reading_ts: float, other_counter: SingleCounter):
+        if reading_kwh is not None and self._prev_reading != reading_kwh:
+            if self._prev_was_edge:
+                self.power = (reading_kwh - self._prev_reading) * 3.6e6 / \
+                             (reading_ts - self.power_to_ts)
+                self.power_from_ts = self.power_to_ts
+                other_counter.power = 0
+                other_counter.power_from_ts = self.power_from_ts
+
+            if self._prev_reading is not None:
+                self._prev_was_edge = True
+            self._prev_reading = reading_kwh
+            self.power_to_ts = reading_ts
+
+
 class PowerMeterApatorEC3Repeating:
     _power_meter: PowerMeterApatorEC3
     _timer: RepeatTimer
@@ -152,15 +183,8 @@ class PowerMeterApatorEC3Repeating:
     reading_ts: Optional[float]
     success: bool
 
-    _prev_high: Optional[float]
-    high_power: Optional[float]
-    high_power_from_ts: Optional[float]
-    high_power_to_ts: Optional[float]
-
-    _prev_low: Optional[float]
-    low_power: Optional[float]
-    low_power_from_ts: Optional[float]
-    low_power_to_ts: Optional[float]
+    high: SingleCounter
+    low: SingleCounter
 
     callbacks: List[Callable[[Optional[PowerMeterReading]], None]]
 
@@ -170,14 +194,8 @@ class PowerMeterApatorEC3Repeating:
         self.reading = None
         self.reading_ts = None
         self.success = False
-        self._prev_high = None
-        self.high_power = None
-        self.high_power_from_ts = None
-        self.high_power_to_ts = None
-        self._prev_low = None
-        self.low_power = None
-        self.low_power_from_ts = None
-        self.low_power_to_ts = None
+        self.high = SingleCounter()
+        self.low = SingleCounter()
         self.callbacks = []
 
     def add_callback(self, callback: Callable[[Optional[PowerMeterReading]], None]):
@@ -204,26 +222,10 @@ class PowerMeterApatorEC3Repeating:
         self._fire()
 
     def _update_low_power(self):
-        if self.reading.consumption_low_sum_kwh is not None \
-                and self._prev_low != self.reading.consumption_low_sum_kwh:
-            if self._prev_low is not None:
-                self.low_power = (self.reading.consumption_low_sum_kwh - self._prev_low) * 3.6e6 / \
-                                 (self.reading_ts - self.low_power_to_ts)
-                self.low_power_from_ts = self.low_power_to_ts
-                self.high_power = 0
-            self._prev_low = self.reading.consumption_low_sum_kwh
-            self.low_power_to_ts = self.reading_ts
+        self.low.update(self.reading.consumption_low_sum_kwh, self.reading_ts, self.high)
 
     def _update_high_power(self):
-        if self.reading.consumption_high_sum_kwh is not None \
-                and self._prev_high != self.reading.consumption_high_sum_kwh:
-            if self._prev_high is not None:
-                self.high_power = (self.reading.consumption_high_sum_kwh - self._prev_high) * 3.6e6 / \
-                                  (self.reading_ts - self.high_power_to_ts)
-                self.high_power_from_ts = self.high_power_to_ts
-                self.low_power = 0
-            self._prev_high = self.reading.consumption_high_sum_kwh
-            self.high_power_to_ts = self.reading_ts
+        self.high.update(self.reading.consumption_high_sum_kwh, self.reading_ts, self.low)
 
     def _fire(self):
         for callback in self.callbacks:
@@ -232,5 +234,5 @@ class PowerMeterApatorEC3Repeating:
 
 if __name__ == '__main__':
     pm = PowerMeterApatorEC3Repeating(PowerMeterApatorEC3("COM5"), 30)
-    pm.callbacks.append(lambda r: print(pm.success, r, pm.reading_ts, pm.low_power, pm.high_power))
+    pm.callbacks.append(lambda r: print(pm.success, r, pm.reading_ts, pm.low.power, pm.high.power))
     pm.start()
