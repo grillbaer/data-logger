@@ -40,11 +40,11 @@ _lu_zu         = TsicSource(     'temp-air-supply',          pigpio_pi, 16,     
 _lu_ab         = TsicSource(     'temp-air-return',          pigpio_pi, 20,        label='Abluft',            unit='°C', value_format='{:.1f}',    color=[0.9, 0.6, 0.3, 1.0], z_order=0)
 _lu_aussen     = TsicSource(     'temp-outdoor',             pigpio_pi, 21,        label='Außentemperatur',   unit='°C', value_format='{:.1f}',    color=[0.1, 0.5, 0.2, 1.0], z_order=1)
 
-_ht_leistung   = MappingSource(  'power-heat-high-tariff',   power_meter_heat,     label='Leistung HT',       unit='W',  value_format='{:.0f}',    color=[0.9, 0.4, 0.1, 1.0], with_graph=False, stale_secs=60,
+_ht_leistung   = MappingSource(  'power-heat-high-tariff',   power_meter_heat,     label='Leistung HT',       unit='W',  value_format='{:.0f}',    color=[0.9, 0.4, 0.1, 1.0], with_graph=False, stale_secs=30*60,
                                  mapping_func=lambda pmeter, reading: SignalValue(pmeter.high.power,
                                                                                   SignalSource.STATUS_OK if pmeter.success and pmeter.high.power is not None else SignalSource.STATUS_MISSING,
                                                                                   pmeter.high.power_from_ts))
-_nt_leistung   = MappingSource(  'power-heat-low-tariff',    power_meter_heat,     label='Leistung NT',       unit='W',  value_format='{:.0f}',    color=[0.2, 0.3, 0.9, 1.0], with_graph=False, stale_secs=60,
+_nt_leistung   = MappingSource(  'power-heat-low-tariff',    power_meter_heat,     label='Leistung NT',       unit='W',  value_format='{:.0f}',    color=[0.2, 0.3, 0.9, 1.0], with_graph=False, stale_secs=30*60,
                                  mapping_func=lambda pmeter, reading: SignalValue(pmeter.low.power,
                                                                                   SignalSource.STATUS_OK if pmeter.success and pmeter.low.power is not None else SignalSource.STATUS_MISSING,
                                                                                   pmeter.low.power_from_ts))
