@@ -168,6 +168,7 @@ class SingleCounter:
                 self.power_from_ts = self.power_to_ts
                 other_counter.power = 0
                 other_counter.power_from_ts = self.power_from_ts
+                other_counter._prev_was_edge = True
 
             if self._prev_reading is not None:
                 self._prev_was_edge = True
