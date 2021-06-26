@@ -57,7 +57,7 @@ _nt_reading    = MappingSource(  'reading-heat-low-tariff', power_meter_heat,   
                                                                                   SignalSource.STATUS_OK if reading.consumption_low_sum_kwh is not None else SignalSource.STATUS_MISSING,
                                                                                   pmeter.reading_ts))
 _hh_leistung   = PulseSource(    'power-household',         pigpio_pi, 18,         label='Haushalt',          unit='W',  value_format='{:.0f}',    color=[0.9, 0.8, 0.1, 1.0], with_graph=False, stale_secs=5*60,
-                                 trigger_edge=pigpio.RISING_EDGE, dead_time_secs=1.0,
+                                 trigger_level=pigpio.LOW, dead_time_secs=1.0, pulse_min_secs=0.08,  # enough for 20 kW
                                  calc_value_func=lambda counter, delta_secs: 3.6e6/75 / delta_secs)  # 75 pulses/kWh
 
 signal_sources_config = {

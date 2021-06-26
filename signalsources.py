@@ -346,26 +346,31 @@ class PulseSource(SignalSource):
     """
     pi: pigpio
     gpio_bcm: int
-    trigger_edge: int
+    trigger_level: int
     dead_time_secs: float
+    pulse_min_secs: float
     calc_value_func: Callable[[int, float], Optional[float]]
 
     counter: int
     delta_secs: Optional[float]
+    _last_maybe_pulse_tick: Optional[int]
     _last_tick: Optional[int]
 
-    def __init__(self, identifier: str, pigpio_pi: pigpio, gpio_bcm: int, trigger_edge: int,
-                 dead_time_secs: float, calc_value_func: Callable[[int, float], Optional[float]],
+    def __init__(self, identifier: str, pigpio_pi: pigpio, gpio_bcm: int, trigger_level: int,
+                 dead_time_secs: float, pulse_min_secs: float,
+                 calc_value_func: Callable[[int, float], Optional[float]],
                  **kwargs):
         super().__init__(identifier, **kwargs)
         self.pi = pigpio_pi
         self.gpio_bcm = gpio_bcm
-        self.trigger_edge = trigger_edge
+        self.trigger_level = trigger_level
         self.dead_time_secs = dead_time_secs
+        self.pulse_min_secs = pulse_min_secs
         self.calc_value_func = calc_value_func
         self.counter = 0
         self.delta_secs = None
         self._last_tick = None
+        self._last_maybe_pulse_tick = None
         self.__pi_callback = None
         if self.pi.connected:
             self.pi.set_mode(self.gpio_bcm, pigpio.INPUT)
@@ -378,7 +383,7 @@ class PulseSource(SignalSource):
         super().start(*args)
         if self.pi.connected:
             self.__pi_callback = self.pi.callback(
-                self.gpio_bcm, self.trigger_edge,
+                self.gpio_bcm, pigpio.EITHER_EDGE,
                 lambda gpio, level, tick: self.__gpio_callback(gpio, level, tick))
 
     def stop(self, *args):
@@ -388,6 +393,15 @@ class PulseSource(SignalSource):
             self.__pi_callback = None
 
     def __gpio_callback(self, gpio, level, tick):
+        # filter bouncing with requiring min pulse time:
+        if self.trigger_level == level:
+            self._last_maybe_pulse_tick = tick
+        else:
+            if self._last_maybe_pulse_tick is not None:
+                delta_secs = pigpio.tickDiff(self._last_maybe_pulse_tick, tick) / 1e6
+                if delta_secs < self.pulse_min_secs:
+                    return
+
         self.counter += 1
         if self._last_tick is not None:
             delta_secs = pigpio.tickDiff(self._last_tick, tick) / 1e6
