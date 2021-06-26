@@ -351,8 +351,8 @@ class PulseSource(SignalSource):
     calc_value_func: Callable[[int, float], Optional[float]]
 
     counter: int
-    delta_secs: float
-    _last_tick: int
+    delta_secs: Optional[float]
+    _last_tick: Optional[int]
 
     def __init__(self, identifier: str, pigpio_pi: pigpio, gpio_bcm: int, trigger_edge: int,
                  dead_time_secs: float, calc_value_func: Callable[[int, float], Optional[float]],
@@ -363,6 +363,9 @@ class PulseSource(SignalSource):
         self.trigger_edge = trigger_edge
         self.dead_time_secs = dead_time_secs
         self.calc_value_func = calc_value_func
+        self.counter = 0
+        self.delta_secs = None
+        self._last_tick = None
         self.__pi_callback = None
         if self.pi.connected:
             self.pi.set_mode(self.gpio_bcm, pigpio.INPUT)
