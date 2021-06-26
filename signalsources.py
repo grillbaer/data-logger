@@ -390,8 +390,16 @@ class PulseSource(SignalSource):
     def __gpio_callback(self, gpio, level, tick):
         self.counter += 1
         if self._last_tick is not None:
-            self.delta_secs = pigpio.tickDiff(self._last_tick, tick) / 1e6
+            delta_secs = pigpio.tickDiff(self._last_tick, tick) / 1e6
+            if delta_secs <= self.dead_time_secs:
+                return
+
+            self.delta_secs = delta_secs
             value = self.calc_value_func(self.counter, self.delta_secs)
+            logger.debug(
+                'Pulse from gpio_bcm=' + str(self.gpio_bcm) +
+                ' after ' + str(self.delta_secs) +
+                ' secs => value=' + str(value))
             self._send(value, self.STATUS_OK if value is not None else self.STATUS_MISSING)
         self._last_tick = tick
 
