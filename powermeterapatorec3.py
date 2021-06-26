@@ -160,8 +160,11 @@ class SingleCounter:
         self.power_from_ts = None
         self.power_to_ts = None
 
-    def update(self, reading_kwh: Optional[float], reading_ts: float, other_counter: SingleCounter):
-        if reading_kwh is not None and self._prev_reading != reading_kwh:
+    def update(self, reading_kwh: Optional[float], reading_ts: float, min_averaging_secs: float,
+               other_counter: SingleCounter):
+        if reading_kwh is not None \
+                and self._prev_reading != reading_kwh \
+                and (self.power_to_ts is None or (reading_ts - self.power_to_ts) >= min_averaging_secs):
             if self._prev_was_edge:
                 self.power = (reading_kwh - self._prev_reading) * 3.6e6 / \
                              (reading_ts - self.power_to_ts)
@@ -177,6 +180,7 @@ class SingleCounter:
 
 
 class PowerMeterApatorEC3Repeating:
+    min_averaging_secs: float
     _power_meter: PowerMeterApatorEC3
     _timer: RepeatTimer
 
@@ -189,7 +193,8 @@ class PowerMeterApatorEC3Repeating:
 
     callbacks: List[Callable[[Optional[PowerMeterReading]], None]]
 
-    def __init__(self, power_meter: PowerMeterApatorEC3, interval: float):
+    def __init__(self, power_meter: PowerMeterApatorEC3, interval: float, min_averaging_secs: float):
+        self.min_averaging_secs = min_averaging_secs
         self._power_meter = power_meter
         self._timer = RepeatTimer(interval, self._acquire)
         self.reading = None
@@ -223,10 +228,10 @@ class PowerMeterApatorEC3Repeating:
         self._fire()
 
     def _update_low_power(self):
-        self.low.update(self.reading.consumption_low_sum_kwh, self.reading_ts, self.high)
+        self.low.update(self.reading.consumption_low_sum_kwh, self.reading_ts, self.min_averaging_secs, self.high)
 
     def _update_high_power(self):
-        self.high.update(self.reading.consumption_high_sum_kwh, self.reading_ts, self.low)
+        self.high.update(self.reading.consumption_high_sum_kwh, self.reading_ts, self.min_averaging_secs, self.low)
 
     def _fire(self):
         for callback in self.callbacks:

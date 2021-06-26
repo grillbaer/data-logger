@@ -26,16 +26,16 @@ class TestPowerMeterApatorEC3(TestCase):
 
 class TestPowerMeterApatorEC3Repeating(TestCase):
     def setUp(self):
-        self.pm = PowerMeterApatorEC3Repeating(MockPowerMeterApatorEC3(), 1)
+        self.pm = PowerMeterApatorEC3Repeating(MockPowerMeterApatorEC3(), 1, 30)
 
     def test_update_high_power(self):
-        self.pm.reading_ts = 1e9
+        self.pm.reading_ts = 1e9 - 200
         self.pm.reading = PowerMeterReading(False, None, None, None)
         self.pm._update_high_power()
         self.pm._update_low_power()
         self.assertIsNone(self.pm.high.power)
 
-        self.pm.reading_ts = 1e9
+        self.pm.reading_ts = 1e9 - 100
         self.pm.reading = PowerMeterReading(True, 3000, 1999.9, 1000)
         self.pm._update_high_power()
         self.pm._update_low_power()
@@ -82,13 +82,13 @@ class TestPowerMeterApatorEC3Repeating(TestCase):
         self.assertEqual(self.pm.low.power, 0)
 
     def test_update_low_power(self):
-        self.pm.reading_ts = 1e9
+        self.pm.reading_ts = 1e9 - 60
         self.pm.reading = PowerMeterReading(False, None, None, None)
         self.pm._update_high_power()
         self.pm._update_low_power()
         self.assertIsNone(self.pm.low.power)
 
-        self.pm.reading_ts = 1e9
+        self.pm.reading_ts = 1e9 - 30
         self.pm.reading = PowerMeterReading(True, 3000, 2000, 999.9)
         self.pm._update_high_power()
         self.pm._update_low_power()

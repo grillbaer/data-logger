@@ -21,7 +21,7 @@ except IOError:
 
 pigpio_pi = pigpio.pi()
 
-power_meter_heat = PowerMeterApatorEC3Repeating(PowerMeterApatorEC3("/dev/serial0"), 5)
+power_meter_heat = PowerMeterApatorEC3Repeating(PowerMeterApatorEC3("/dev/serial0"), 2, 60)
 
 _quelle_ein    = Ds1820Source(   'temp-from-well',           '28-0000089b1ca2', 1, label='Quelle ein',        unit='°C', value_format='{:.1f}',    color=[0.5, 0.5, 1.0, 1.0], z_order=1)
 _quelle_aus    = Ds1820Source(   'temp-to-well',             '28-000008640446', 1, label='Quelle aus',        unit='°C', value_format='{:.1f}',    color=[0.0, 0.2, 1.0, 1.0], z_order=2)
