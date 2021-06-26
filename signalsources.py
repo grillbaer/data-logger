@@ -396,6 +396,7 @@ class PulseSource(SignalSource):
         # filter bouncing with requiring min pulse time:
         if self.trigger_level == level:
             self._last_maybe_pulse_tick = tick
+            return
         else:
             if self._last_maybe_pulse_tick is not None:
                 delta_secs = pigpio.tickDiff(self._last_maybe_pulse_tick, tick) / 1e6
