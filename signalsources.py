@@ -12,7 +12,7 @@ import random
 import re
 import time
 from collections import namedtuple
-from typing import Callable, Any
+from typing import Callable, Any, Optional
 
 import pigpio
 from tsic import TsicInputChannel, PigpioNotConnectedError
@@ -331,6 +331,66 @@ class DigitalInSource(SignalSource):
 
     def format(self, value):
         return self.text_1 if value != 0 else self.text_0
+
+    def __repr__(self):
+        return super().__repr__() + ' gpio_bcm=' + str(self.gpio_bcm)
+
+
+class PulseSource(SignalSource):
+    """
+    Digital GPIO pulse counting and time delta measuring signal source.
+    Useful for calculating rates, throughput or power from pulse sources.
+
+    Output value calculation is performed by a passed lambda function
+    calc_value_func(counter: int, delta_secs: float) -> Optional[float].
+    """
+    pi: pigpio
+    gpio_bcm: int
+    trigger_edge: int
+    dead_time_secs: float
+    calc_value_func: Callable[[int, float], Optional[float]]
+
+    counter: int
+    delta_secs: float
+    _last_tick: int
+
+    def __init__(self, identifier: str, pigpio_pi: pigpio, gpio_bcm: int, trigger_edge: int,
+                 dead_time_secs: float, calc_value_func: Callable[[int, float], Optional[float]],
+                 **kwargs):
+        super().__init__(identifier, **kwargs)
+        self.pi = pigpio_pi
+        self.gpio_bcm = gpio_bcm
+        self.trigger_edge = trigger_edge
+        self.dead_time_secs = dead_time_secs
+        self.calc_value_func = calc_value_func
+        self.__pi_callback = None
+        if self.pi.connected:
+            self.pi.set_mode(self.gpio_bcm, pigpio.INPUT)
+            self.pi.set_pull_up_down(self.gpio_bcm, pigpio.PUD_OFF)
+        else:
+            raise PigpioNotConnectedError(
+                'pigpio.pi is not connected, pulse input for gpio ' + str(gpio_bcm) + ' will not work')
+
+    def start(self, *args):
+        super().start(*args)
+        if self.pi.connected:
+            self.__pi_callback = self.pi.callback(
+                self.gpio_bcm, self.trigger_edge,
+                lambda gpio, level, tick: self.__gpio_callback(gpio, level, tick))
+
+    def stop(self, *args):
+        super().stop(*args)
+        if self.__pi_callback is not None:
+            self.__pi_callback.cancel()
+            self.__pi_callback = None
+
+    def __gpio_callback(self, gpio, level, tick):
+        self.counter += 1
+        if self._last_tick is not None:
+            self.delta_secs = pigpio.tickDiff(self._last_tick, tick) / 1e6
+            value = self.calc_value_func(self.counter, self.delta_secs)
+            self._send(value, self.STATUS_OK if value is not None else self.STATUS_MISSING)
+        self._last_tick = tick
 
     def __repr__(self):
         return super().__repr__() + ' gpio_bcm=' + str(self.gpio_bcm)

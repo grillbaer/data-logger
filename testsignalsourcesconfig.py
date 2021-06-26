@@ -29,6 +29,7 @@ _ht_leistung   = TestSource(       'power-heat-high-tariff',    2000, 10, label=
 _nt_leistung   = TestSource(       'power-heat-low-tariff',     2000, 10, label='Leistung NT',       unit='W',  value_format='{:.0f}',    color=[0.2, 0.3, 0.9, 1.0], with_graph=False, small=False)
 _ht_reading    = TestSource(       'reading-heat-high-tariff', 12345, 10, label='Stand HT',          unit='kWh',value_format='{:.1f}',    color=[0.9, 0.4, 0.1, 0.5], with_graph=False, small=True)
 _nt_reading    = TestSource(       'reading-heat-low-tariff',  12345, 10, label='Stand NT',          unit='kWh',value_format='{:.1f}',    color=[0.2, 0.3, 0.9, 0.5], with_graph=False, small=True)
+_hh_leistung   = TestSource(       'power-household',          12345, 10, label='Haushalt',          unit='kWh',value_format='{:.1f}',    color=[0.9, 0.8, 0.1, 1.0], with_graph=False, small=True)
 
 signal_sources_config = {
     'groups' : [
@@ -69,6 +70,7 @@ signal_sources_config = {
             _nt_leistung,
             _ht_reading,
             _nt_reading,
+            _hh_leistung,
         ]}
     ],
     
