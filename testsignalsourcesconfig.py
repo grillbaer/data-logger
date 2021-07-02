@@ -4,7 +4,7 @@ To be used as import in main.py for simulation.
 """
 
 __author__ = 'Holger Fleischmann'
-__copyright__ = 'Copyright 2019, Holger Fleischmann, Bavaria/Germany'
+__copyright__ = 'Copyright 2021, Holger Fleischmann, Bavaria/Germany'
 __license__ = 'Apache License 2.0'
 
 from signalsources import TestSource, TestDigitalSource, DeltaSource

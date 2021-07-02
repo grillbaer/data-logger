@@ -1,3 +1,7 @@
+__author__ = 'Holger Fleischmann'
+__copyright__ = 'Copyright 2021, Holger Fleischmann, Bavaria/Germany'
+__license__ = 'Apache License 2.0'
+
 from unittest import TestCase, main
 
 from powermeterapatorec3 import PowerMeterReading, PowerMeterApatorEC3Repeating, PowerMeterApatorEC3

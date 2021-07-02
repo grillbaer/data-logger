@@ -5,7 +5,7 @@ Data Logger application.
 """
 
 __author__ = 'Holger Fleischmann'
-__copyright__ = 'Copyright 2018, Holger Fleischmann, Bavaria/Germany'
+__copyright__ = 'Copyright 2021, Holger Fleischmann, Bavaria/Germany'
 __license__ = 'Apache License 2.0'
 
 # initialize custom logging:
