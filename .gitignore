@@ -1,8 +1,11 @@
 /csv/
 /logs/
 /__pycache__/
-/nohup.out
 /env/
+/.idea/sonarlint/
+/venv/
+/*.pyc
 *secret*
-
+/nohup.out
 /*.pem
+

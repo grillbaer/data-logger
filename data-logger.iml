@@ -10,6 +10,5 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Python 3.9 (data-logger-3.9) interpreter library" level="application" />
   </component>
 </module>
