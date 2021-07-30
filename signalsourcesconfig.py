@@ -9,7 +9,9 @@ __license__ = 'Apache License 2.0'
 
 import pigpio
 
-from signalsources import TsicSource, Ds1820Source, DeltaSource, DigitalInSource
+from signalsources import TsicSource, Ds1820Source, DeltaSource, DigitalInSource, MappingSource, SignalSource, \
+    SignalValue, PulseSource
+from powermeterapatorec3 import PowerMeterApatorEC3Repeating, PowerMeterApatorEC3
 
 try:
     with open("secret-mqtt-password", "r") as f:
@@ -18,6 +20,8 @@ except IOError:
     mqtt_password = ''
 
 pigpio_pi = pigpio.pi()
+
+power_meter_heat = PowerMeterApatorEC3Repeating(PowerMeterApatorEC3("/dev/serial0"), 10, 2*60)
 
 _quelle_ein    = Ds1820Source(   'temp-from-well',           '28-0000089b1ca2', 1, label='Quelle ein',        unit='°C', value_format='{:.1f}',    color=[0.5, 0.5, 1.0, 1.0], z_order=1)
 _quelle_aus    = Ds1820Source(   'temp-to-well',             '28-000008640446', 1, label='Quelle aus',        unit='°C', value_format='{:.1f}',    color=[0.0, 0.2, 1.0, 1.0], z_order=2)
@@ -30,11 +34,36 @@ _hz_rueck      = Ds1820Source(   'temp-heat-return',         '10-000801dd3975', 
 _ww_speicher_o = TsicSource(     'temp-water-boiler-top',    pigpio_pi, 19,        label='Wasser oben',       unit='°C', value_format='{:.1f}',    color=[0.8, 0.7, 1.0, 1.0], z_order=-1, corr_offset=+2.5)
 _ww_speicher_u = Ds1820Source(   'temp-water-boiler-middle', '28-0000089967c2', 1, label='Wasser mitte',      unit='°C', value_format='{:.1f}',    color=[0.4, 0.3, 0.5, 1.0], z_order=-2)
 _ww_zirk       = Ds1820Source(   'temp-water-circ-return',   '28-0000089a5063', 1, label='Zirkulation',       unit='°C', value_format='{:.1f}',    color=[0.1, 0.6, 0.4, 1.0], z_order=-1)
+
+_wasser_haupt_flow = PulseSource('flow-water-main',          pigpio_pi, 6,         label='Wasser Haupt',       unit='l/h', value_format='{:.1f}',   color=[0.2, 0.2, 0.8, 1.0], with_graph=False, stale_secs=5*60,
+                                 trigger_level=pigpio.HIGH, dead_time_secs=4, pulse_min_secs=2,
+                                 calc_value_func=lambda counter, delta_secs: 10.0*3600 / delta_secs)   # 1 pulse/ 10 l
+
 _lu_frisch     = Ds1820Source(   'temp-air-fresh',           '28-000008656f81', 1, label='Frischluft',        unit='°C', value_format='{:.1f}',    color=[0.2, 0.8, 1.0, 1.0], z_order=-1)
 _lu_fort       = Ds1820Source(   'temp-air-exhaust',         '10-000801dcfc0f', 1, label='Fortluft',          unit='°C', value_format='{:.1f}',    color=[0.7, 0.3, 0.1, 1.0], z_order=-1)
 _lu_zu         = TsicSource(     'temp-air-supply',          pigpio_pi, 16,        label='Zuluft',            unit='°C', value_format='{:.1f}',    color=[0.7, 0.8, 0.9, 1.0], z_order=0)
 _lu_ab         = TsicSource(     'temp-air-return',          pigpio_pi, 20,        label='Abluft',            unit='°C', value_format='{:.1f}',    color=[0.9, 0.6, 0.3, 1.0], z_order=0)
-_lu_aussen    = TsicSource(      'temp-outdoor',             pigpio_pi, 21,        label='Außentemperatur',   unit='°C', value_format='{:.1f}',    color=[0.1, 0.5, 0.2, 1.0], z_order=1)
+_lu_aussen     = TsicSource(     'temp-outdoor',             pigpio_pi, 21,        label='Außentemperatur',   unit='°C', value_format='{:.1f}',    color=[0.1, 0.5, 0.2, 1.0], z_order=1)
+
+_ht_leistung   = MappingSource(  'power-heat-high-tariff',   power_meter_heat,     label='Leistung HT',       unit='W',  value_format='{:.0f}',    color=[0.9, 0.4, 0.1, 1.0], with_graph=False, stale_secs=10*60,
+                                 mapping_func=lambda pmeter, reading: SignalValue(pmeter.high.power,
+                                                                                  SignalSource.STATUS_OK if pmeter.success and pmeter.high.power is not None else SignalSource.STATUS_MISSING,
+                                                                                  pmeter.high.power_from_ts))
+_nt_leistung   = MappingSource(  'power-heat-low-tariff',    power_meter_heat,     label='Leistung NT',       unit='W',  value_format='{:.0f}',    color=[0.2, 0.3, 0.9, 1.0], with_graph=False, stale_secs=10*60,
+                                 mapping_func=lambda pmeter, reading: SignalValue(pmeter.low.power,
+                                                                                  SignalSource.STATUS_OK if pmeter.success and pmeter.low.power is not None else SignalSource.STATUS_MISSING,
+                                                                                  pmeter.low.power_from_ts))
+_ht_reading    = MappingSource(  'reading-heat-high-tariff', power_meter_heat,     label='Stand HT',          unit='kWh',value_format='{:.1f}',    color=[0.9, 0.4, 0.1, 0.5], with_graph=False, stale_secs=30, small=True,
+                                 mapping_func=lambda pmeter, reading: SignalValue(reading.consumption_high_sum_kwh,
+                                                                                  SignalSource.STATUS_OK if reading.consumption_high_sum_kwh is not None else SignalSource.STATUS_MISSING,
+                                                                                  pmeter.reading_ts))
+_nt_reading    = MappingSource(  'reading-heat-low-tariff', power_meter_heat,      label='Stand NT',          unit='kWh',value_format='{:.1f}',    color=[0.2, 0.3, 0.9, 0.5], with_graph=False, stale_secs=30, small=True,
+                                 mapping_func=lambda pmeter, reading: SignalValue(reading.consumption_low_sum_kwh,
+                                                                                  SignalSource.STATUS_OK if reading.consumption_low_sum_kwh is not None else SignalSource.STATUS_MISSING,
+                                                                                  pmeter.reading_ts))
+_hh_leistung   = PulseSource(    'power-household',         pigpio_pi, 18,         label='Haushalt',          unit='W',  value_format='{:.0f}',    color=[0.9, 0.8, 0.1, 1.0], with_graph=False, stale_secs=5*60,
+                                 trigger_level=pigpio.HIGH, dead_time_secs=1.6, pulse_min_secs=0.06,  # enough for 30 kW
+                                 calc_value_func=lambda counter, delta_secs: 3.6e6/75 / delta_secs)   # 75 pulses/kWh
 
 signal_sources_config = {
     'groups' : [
@@ -61,8 +90,9 @@ signal_sources_config = {
             _ww_speicher_u,
             _ww_zirk,
             DeltaSource('temp-water-circ-return-delta', _ww_speicher_o, _ww_zirk, label='\u0394 Wasser-Zirk', unit='K',  value_format='{:.1f}', color=[0.0, 0.0, 0.0, 1.0], with_graph = False),
+            _wasser_haupt_flow,
         ]},
-        {'label' : 'Lüftung',
+        {'label' : 'Lüftung/Zähler',
          'sources' : [
             _lu_frisch,
             _lu_fort,
@@ -71,9 +101,14 @@ signal_sources_config = {
             _lu_ab,
             DeltaSource('temp-air-supply-return-delta', _lu_ab, _lu_zu,           label='\u0394 Ab-Zu',       unit='K',  value_format='{:.1f}', color=[0.0, 0.0, 0.0, 1.0], with_graph = False),
             _lu_aussen,
+            _ht_leistung,
+            _nt_leistung,
+            _ht_reading,
+            _nt_reading,
+            _hh_leistung
         ]}
     ],
-    
+
     'mqtt_broker_host' : 'homeserver.fritz.box',
     'mqtt_broker_port' : 8883,
     'mqtt_broker_user' : 'user',

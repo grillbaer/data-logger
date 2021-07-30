@@ -1,8 +1,9 @@
 tsic
 psutil
 paho-mqtt
-kivy
-kivy_garden.graph
+Kivy
+kivy-garden.graph
+pyserial
 
 # install this manually AFTER other deps:
 #https://github.com/kivy-garden/graph/archive/master.zip
