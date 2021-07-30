@@ -34,6 +34,11 @@ _hz_rueck      = Ds1820Source(   'temp-heat-return',         '10-000801dd3975', 
 _ww_speicher_o = TsicSource(     'temp-water-boiler-top',    pigpio_pi, 19,        label='Wasser oben',       unit='°C', value_format='{:.1f}',    color=[0.8, 0.7, 1.0, 1.0], z_order=-1, corr_offset=+2.5)
 _ww_speicher_u = Ds1820Source(   'temp-water-boiler-middle', '28-0000089967c2', 1, label='Wasser mitte',      unit='°C', value_format='{:.1f}',    color=[0.4, 0.3, 0.5, 1.0], z_order=-2)
 _ww_zirk       = Ds1820Source(   'temp-water-circ-return',   '28-0000089a5063', 1, label='Zirkulation',       unit='°C', value_format='{:.1f}',    color=[0.1, 0.6, 0.4, 1.0], z_order=-1)
+
+_wasser_haupt_flow = PulseSource('flow-water-main',          pigpio_pi, 6,         label='Wasser Haupt',       unit='l/h', value_format='{:.1f}',   color=[0.2, 0.2, 0.8, 1.0], with_graph=False, stale_secs=5*60,
+                                 trigger_level=pigpio.HIGH, dead_time_secs=4, pulse_min_secs=2,
+                                 calc_value_func=lambda counter, delta_secs: 10.0*3600 / delta_secs)   # 1 pulse/ 10 l
+
 _lu_frisch     = Ds1820Source(   'temp-air-fresh',           '28-000008656f81', 1, label='Frischluft',        unit='°C', value_format='{:.1f}',    color=[0.2, 0.8, 1.0, 1.0], z_order=-1)
 _lu_fort       = Ds1820Source(   'temp-air-exhaust',         '10-000801dcfc0f', 1, label='Fortluft',          unit='°C', value_format='{:.1f}',    color=[0.7, 0.3, 0.1, 1.0], z_order=-1)
 _lu_zu         = TsicSource(     'temp-air-supply',          pigpio_pi, 16,        label='Zuluft',            unit='°C', value_format='{:.1f}',    color=[0.7, 0.8, 0.9, 1.0], z_order=0)
@@ -85,6 +90,7 @@ signal_sources_config = {
             _ww_speicher_u,
             _ww_zirk,
             DeltaSource('temp-water-circ-return-delta', _ww_speicher_o, _ww_zirk, label='\u0394 Wasser-Zirk', unit='K',  value_format='{:.1f}', color=[0.0, 0.0, 0.0, 1.0], with_graph = False),
+            _wasser_haupt_flow,
         ]},
         {'label' : 'Lüftung/Zähler',
          'sources' : [
