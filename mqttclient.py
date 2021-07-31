@@ -8,7 +8,7 @@ __license__ = 'Apache License 2.0'
 
 import logging
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 import paho.mqtt.client as mqtt
 
@@ -91,7 +91,8 @@ class MqttClient:
                     'formatted':
                         '---' if signal_value.status != SignalSource.STATUS_OK
                         else source.format(signal_value.value),
-                    'timestamp': datetime.fromtimestamp(signal_value.timestamp).isoformat(),
+                    'timestamp': datetime.fromtimestamp(signal_value.timestamp).astimezone(timezone.utc).
+                        strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
                     'unit':      source.unit
                 })
                 self.client.publish(topic, json_value, 0, True)
