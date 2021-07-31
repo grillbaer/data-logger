@@ -89,9 +89,10 @@ class SignalSource:
         logger.debug('Stopping ' + str(self))
         self.running = False
 
-    def _send(self, value: float, status: str = STATUS_OK, timestamp: float = time.time()):
+    def _send(self, value: float, status: str = STATUS_OK, timestamp: Optional[float] = None):
         if self.running:
-            self._send_signal_value(SignalValue(value + self.corr_offset, status, timestamp))
+            ts = time.time() if timestamp is None else timestamp
+            self._send_signal_value(SignalValue(value + self.corr_offset, status, ts))
 
     def _send_signal_value(self, signal_value: SignalValue):
         if self.running:
