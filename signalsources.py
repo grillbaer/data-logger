@@ -89,9 +89,9 @@ class SignalSource:
         logger.debug('Stopping ' + str(self))
         self.running = False
 
-    def _send(self, value, status):
+    def _send(self, value: float, status: str = STATUS_OK, timestamp: float = time.time()):
         if self.running:
-            self._send_signal_value(SignalValue(value + self.corr_offset, status, time.time()))
+            self._send_signal_value(SignalValue(value + self.corr_offset, status, timestamp))
 
     def _send_signal_value(self, signal_value: SignalValue):
         if self.running:
@@ -410,12 +410,13 @@ class PulseSource(SignalSource):
                 return
 
             self.delta_secs = delta_secs
+            begin_ts = time.time() - delta_secs
             value = self.calc_value_func(self.counter, self.delta_secs)
             logger.debug(
                 'Pulse from gpio_bcm=' + str(self.gpio_bcm) +
                 ' after ' + str(self.delta_secs) +
                 ' secs => value=' + str(value))
-            self._send(value, self.STATUS_OK if value is not None else self.STATUS_MISSING)
+            self._send(value, self.STATUS_OK if value is not None else self.STATUS_MISSING, timestamp=begin_ts)
         self._last_tick = tick
 
     def __repr__(self):
