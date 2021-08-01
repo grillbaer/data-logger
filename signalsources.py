@@ -337,6 +337,26 @@ class DigitalInSource(SignalSource):
         return super().__repr__() + ' gpio_bcm=' + str(self.gpio_bcm)
 
 
+class PigpioTimestamp:
+    """
+    Timestamp from pi gpio which handles both the pigpio tick accuracy and
+    also long durations without tick rollover.
+    """
+    ticks: int
+    epoch_secs: float
+
+    def __init__(self, ticks: int):
+        self.ticks = ticks
+        self.epoch_secs = time.time()
+
+    def delta_secs_to(self, latter_timestamp: 'PigpioTimestamp'):
+        rough_delta_secs = latter_timestamp.epoch_secs - self.epoch_secs
+        if rough_delta_secs >= 3600:  # pigpio ticks wrap around in about 71 minutes
+            return rough_delta_secs
+        else:
+            return pigpio.tickDiff(self.ticks, latter_timestamp.ticks) / 1.0e6
+
+
 class PulseSource(SignalSource):
     """
     Digital GPIO pulse counting and time delta measuring signal source.
@@ -354,8 +374,9 @@ class PulseSource(SignalSource):
 
     counter: int
     delta_secs: Optional[float]
-    _last_maybe_pulse_tick: Optional[int]
-    _last_tick: Optional[int]
+
+    _last_maybe_pulse_timestamp: Optional[PigpioTimestamp]
+    _last_timestamp: Optional[PigpioTimestamp]
 
     def __init__(self, identifier: str, pigpio_pi: pigpio, gpio_bcm: int, trigger_level: int,
                  dead_time_secs: float, pulse_min_secs: float,
@@ -370,8 +391,8 @@ class PulseSource(SignalSource):
         self.calc_value_func = calc_value_func
         self.counter = 0
         self.delta_secs = None
-        self._last_tick = None
-        self._last_maybe_pulse_tick = None
+        self._last_timestamp = None
+        self._last_maybe_pulse_timestamp = None
         self.__pi_callback = None
         if self.pi.connected:
             self.pi.set_mode(self.gpio_bcm, pigpio.INPUT)
@@ -394,31 +415,32 @@ class PulseSource(SignalSource):
             self.__pi_callback = None
 
     def __gpio_callback(self, gpio, level, tick):
+        timestamp = PigpioTimestamp(tick)
         # filter bouncing with requiring min pulse time:
         if self.trigger_level == level:
-            self._last_maybe_pulse_tick = tick
+            self._last_maybe_pulse_timestamp = timestamp
             return
         else:
-            if self._last_maybe_pulse_tick is not None:
-                delta_secs = pigpio.tickDiff(self._last_maybe_pulse_tick, tick) / 1e6
+            if self._last_maybe_pulse_timestamp is not None:
+                delta_secs = self._last_maybe_pulse_timestamp.delta_secs_to(timestamp)
                 if delta_secs < self.pulse_min_secs:
                     return
 
         self.counter += 1
-        if self._last_tick is not None:
-            delta_secs = pigpio.tickDiff(self._last_tick, tick) / 1e6
+        if self._last_timestamp is not None:
+            delta_secs = self._last_timestamp.delta_secs_to(timestamp)
             if delta_secs <= self.dead_time_secs:
                 return
 
             self.delta_secs = delta_secs
-            begin_ts = time.time() - delta_secs
+            begin_ts = timestamp.epoch_secs - delta_secs
             value = self.calc_value_func(self.counter, self.delta_secs)
             logger.debug(
                 'Pulse from gpio_bcm=' + str(self.gpio_bcm) +
                 ' after ' + str(self.delta_secs) +
                 ' secs => value=' + str(value))
             self._send(value, self.STATUS_OK if value is not None else self.STATUS_MISSING, timestamp=begin_ts)
-        self._last_tick = tick
+        self._last_timestamp = timestamp
 
     def __repr__(self):
         return super().__repr__() + ' gpio_bcm=' + str(self.gpio_bcm)
