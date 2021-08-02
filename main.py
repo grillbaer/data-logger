@@ -23,8 +23,8 @@ from kivy.uix.boxlayout import BoxLayout
 
 from mqttclient import MqttClient
 
-# from signalsourcesconfig import signal_sources_config
-from mocksignalsourcesconfig import signal_sources_config
+from signalsourcesconfig import signal_sources_config
+# from mocksignalsourcesconfig import signal_sources_config
 
 logger = logging.getLogger().getChild(__name__)
 
