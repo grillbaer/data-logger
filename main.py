@@ -23,10 +23,10 @@ from kivy.uix.boxlayout import BoxLayout
 
 from mqttclient import MqttClient
 
-from signalsourcesconfig import signal_sources_config
-#from testsignalsourcesconfig import signal_sources_config
+# from signalsourcesconfig import signal_sources_config
+from mocksignalsourcesconfig import signal_sources_config
 
-logger = logging.getLogger().getChild(__name__) 
+logger = logging.getLogger().getChild(__name__)
 
 
 class DataLoggerWidget(BoxLayout):
@@ -38,27 +38,27 @@ class DataLoggerWidget(BoxLayout):
     date_text = StringProperty()
 
     SCREENSAVER_DELAY = 600
-    
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.clock_update_event = Clock.schedule_interval(self.update_clock, 1.)
         self.ids.measurements_screen.use_signals_config(signal_sources_config)
         self.ids.graphs_screen.use_signals_config(signal_sources_config)
-        
-        self._last_user_activity = time.time() 
+
+        self._last_user_activity = time.time()
         self._screensaver_active = None
         self._activate_screensaver(False)
-    
+
     def update_clock(self, *args):
         now = time.time()
         dt = datetime.fromtimestamp(now)
         self.time_text = '{:%H:%M:%S}'.format(dt)
         self.date_text = '{:%d.%m.%Y}'.format(dt)
 
-        if not self._last_user_activity is None and self._last_user_activity < now - DataLoggerWidget.SCREENSAVER_DELAY:
+        if self._last_user_activity is not None and self._last_user_activity < now - DataLoggerWidget.SCREENSAVER_DELAY:
             self._activate_screensaver(True)
             self._last_user_activity = None
-        
+
     def on_touch_down(self, touch):
         self._last_user_activity = time.time()
         self._activate_screensaver(False)

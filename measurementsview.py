@@ -18,15 +18,15 @@ from kivy.uix.boxlayout import BoxLayout
 
 from signalsources import SignalSource, SignalValue
 
-logger = logging.getLogger().getChild(__name__) 
+logger = logging.getLogger().getChild(__name__)
 
 
 class MeasurementsScreen(BoxLayout):
-    
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.history = None
-        
+
     def use_signals_config(self, signal_sources_config):
         for group in signal_sources_config['groups']:
             group_label = group['label']
@@ -36,11 +36,11 @@ class MeasurementsScreen(BoxLayout):
                 logger.info('Adding signal {:12} > {:18} - {}'.format(group_label, source.label, str(source)))
                 group_widget.add_source(source)
                 source.start()
-        
+
 
 class MeasurementsGroup(BoxLayout):
     header_text = StringProperty()
-    
+
     def __init__(self, header_text, **kwargs):
         super().__init__(**kwargs)
         self.header_text = header_text
@@ -83,8 +83,8 @@ class MeasurementItem(BoxLayout):
     def start_stale_timer(self):
         self.stop_stale_timer()
         self.stale_clock = Clock.schedule_once(self.mark_stale, self.source.stale_secs)
-        
+
     def stop_stale_timer(self):
-        if not self.stale_clock is None:
+        if self.stale_clock is not None:
             self.stale_clock.cancel()
             self.stale_clock = None

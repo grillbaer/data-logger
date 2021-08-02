@@ -14,7 +14,7 @@ from kivy.uix.boxlayout import BoxLayout
 
 from popups import OkCancelPopup
 
-logger = logging.getLogger().getChild(__name__) 
+logger = logging.getLogger().getChild(__name__)
 
 
 class ServiceScreen(BoxLayout):
@@ -25,22 +25,23 @@ class ServiceScreen(BoxLayout):
     def reboot(self):
         logger.info('REBOOT triggered')
         self.exec(['sudo', 'reboot', 'now'])
-        
+
     def shutdown_action(self):
         OkCancelPopup(title='Herunterfahren', message='System jetzt herunterfahren?', ok_callback=self.shutdown)
 
     def shutdown(self):
         logger.info('SHUTDOWN triggered')
         self.exec(['sudo', 'shutdown', 'now'])
-        
+
     def update_action(self):
-        OkCancelPopup(title='Aktualisieren', message='Software jetzt aktualisieren und System neu starten?', ok_callback=self.update)
-        
+        OkCancelPopup(title='Aktualisieren', message='Software jetzt aktualisieren und System neu starten?',
+                      ok_callback=self.update)
+
     def update(self):
         logger.info('UPDATE triggered')
         if self.exec(['sh', '-c', 'cd ' + os.getcwd() + '; git pull']) == 0:
             self.reboot()
-    
+
     def exec(self, command):
         try:
             exit_code = call(command)
@@ -50,4 +51,3 @@ class ServiceScreen(BoxLayout):
         except IOError as ex:
             logger.error('Command ' + str(command) + ' failed: ' + str(ex))
             return -1
-        

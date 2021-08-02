@@ -7,6 +7,8 @@ __author__ = 'Holger Fleischmann'
 __copyright__ = 'Copyright 2021, Holger Fleischmann, Bavaria/Germany'
 __license__ = 'Apache License 2.0'
 
+from typing import List, Dict, Tuple
+
 import csv
 from datetime import datetime
 import logging
@@ -15,10 +17,10 @@ import re
 from threading import RLock
 import time
 
-from signalsources import SignalSource 
+from signalsources import SignalSource
 from utils import RepeatTimer
 
-logger = logging.getLogger().getChild(__name__) 
+logger = logging.getLogger().getChild(__name__)
 
 
 class SignalHistory:
@@ -26,13 +28,16 @@ class SignalHistory:
     DELTA_SECONDS_DEFAULT = 60  # every minute
     MAX_SECONDS_CSV_FILES = 24 * 3600 * 32  # 32 days
 
+    sources: List[SignalSource]
+    _values_by_source_id: Dict[int, List[Tuple[float, float]]]
+
     def __init__(self):
-        
+
         self.max_seconds = SignalHistory.MAX_SECONDS_DEFAULT
         self.delta_seconds = SignalHistory.DELTA_SECONDS_DEFAULT
         self.max_seconds_csv_files = SignalHistory.MAX_SECONDS_CSV_FILES
         self.max_csv_lines = self.max_seconds // self.delta_seconds + 1
-        
+
         self.sources = []
         self._values_by_source_id = {}
         self._timer = None
@@ -44,32 +49,32 @@ class SignalHistory:
 
     def __enter__(self):
         self._data_lock.acquire()
-    
+
     def __exit__(self, exc_type, exc_value, traceback):
         self._data_lock.release()
-        
-    def add_source(self, signal_source):
+
+    def add_source(self, signal_source: SignalSource) -> None:
         with self._data_lock:
             if signal_source in self.sources:
                 self.sources.remove(signal_source)
             self.sources.append(signal_source)
             self._values_by_source_id[id(signal_source)] = []
-    
+
     def remove_source(self, signal_source):
         with self._data_lock:
             self.sources.remove(signal_source)
             self._values_by_source_id.pop(id(signal_source))
-    
+
     def start(self):
         if self._timer is None:
-            logger.info('Starting to record history every ' + 
+            logger.info('Starting to record history every ' +
                         str(self.delta_seconds) + 's for ' + str(self.max_seconds) + 's')
             self._begin_new_csv_file()
             self._timer = RepeatTimer(self.delta_seconds, self.record)
             self._timer.start()
-        
+
     def stop(self):
-        if not self._timer is None:
+        if self._timer is not None:
             self._timer.cancel()
             self._timer = None
             self._close_csv_file()
@@ -87,15 +92,15 @@ class SignalHistory:
             self.__clean_old_history(now)
             for source in self.sources:
                 value = source.last_value
-                if (value is not None 
-                      and value.status == SignalSource.STATUS_OK
-                      and value.timestamp > now - self.delta_seconds
-                      and source.running):
+                if (value is not None
+                        and value.status == SignalSource.STATUS_OK
+                        and value.timestamp > now - self.delta_seconds
+                        and source.running):
                     self._values_by_source_id[id(source)].append((now, value.value))
                     row.append(float(source.value_format.format(value.value)))
                 else:
                     row.append(None)
-        
+
         if self._csv_writer is not None:
             self._csv_writer.writerow(row)
             self._csv_lines += 1
@@ -127,7 +132,7 @@ class SignalHistory:
             self._csv_writer = csv.writer(self._csv_file)
             self._csv_writer.writerow(['Time'] + [source.label for source in self.sources])
             self._csv_lines = 1
-    
+
     def _close_csv_file(self):
         if self._csv_file is not None:
             logger.info("'Closing CSV file '" + self._csv_file.name + "'")
@@ -135,7 +140,7 @@ class SignalHistory:
             self._csv_file = None
             self._csv_writer = None
             self._csv_lines = 0
-        
+
     def _new_csv_file_name(self):
         return '{:}-{:%Y-%m-%d-%H%M%S}.csv'.format(self._csv_file_basename, datetime.now())
 
@@ -154,8 +159,9 @@ class SignalHistory:
         [(full_file_name, begin_timestamp, last_modified_timestamp), ...].
         """
         dir_name, file_prefix = os.path.split(self._csv_file_basename)
-        file_pattern = re.compile('^' + file_prefix + '-(([0-9]{4})-([0-9]{2})-([0-9]{2})-([0-9]{2})([0-9]{2})([0-9]{2})).csv$')
-        
+        file_pattern = re.compile(
+            '^' + file_prefix + '-(([0-9]{4})-([0-9]{2})-([0-9]{2})-([0-9]{2})([0-9]{2})([0-9]{2})).csv$')
+
         csv_files = []
         for file in os.listdir(dir_name):
             match = file_pattern.match(file)

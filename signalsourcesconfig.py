@@ -115,5 +115,5 @@ signal_sources_config = {
     'mqtt_broker_password' : mqtt_password,
     'mqtt_broker_base_topic' : 'home/heating/data-logger',
     'mqtt_use_ssl': True,
-    'mqtt_broker_cacerts': 'mqtt_broker_cacert.pem'
+    'mqtt_broker_ca_certs': 'mqtt_broker_cacert.pem'
 }

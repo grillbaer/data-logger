@@ -165,7 +165,7 @@ class SingleCounter:
         if reading_kwh is not None \
                 and self._prev_reading != reading_kwh \
                 and (self.power_to_ts is None or (reading_ts - self.power_to_ts) >= min_averaging_secs):
-            if self._prev_was_edge:
+            if self._prev_was_edge and self.power_to_ts is not None:
                 self.power = (reading_kwh - self._prev_reading) * 3.6e6 / \
                              (reading_ts - self.power_to_ts)
                 self.power_from_ts = self.power_to_ts
@@ -239,6 +239,6 @@ class PowerMeterApatorEC3Repeating:
 
 
 if __name__ == '__main__':
-    pm = PowerMeterApatorEC3Repeating(PowerMeterApatorEC3("COM5"), 30)
+    pm = PowerMeterApatorEC3Repeating(PowerMeterApatorEC3("COM5"), 30, 10)
     pm.callbacks.append(lambda r: print(pm.success, r, pm.reading_ts, pm.low.power, pm.high.power))
     pm.start()

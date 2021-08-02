@@ -1,6 +1,7 @@
 tsic
 psutil
 paho-mqtt
+pigpio
 Kivy
 kivy-garden.graph
 pyserial

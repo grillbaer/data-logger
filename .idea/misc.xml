@@ -3,4 +3,7 @@
   <component name="ProjectRootManager" version="2" languageLevel="JDK_14" project-jdk-name="Python 3.7 (data-logger)" project-jdk-type="Python SDK">
     <output url="file://$PROJECT_DIR$/classes" />
   </component>
+  <component name="PythonCompatibilityInspectionAdvertiser">
+    <option name="version" value="3" />
+  </component>
 </project>

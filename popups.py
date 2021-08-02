@@ -23,7 +23,7 @@ class OkCancelPopup(Popup):
     def ok_action(self):
         self.dismiss()
         self.result = 'ok'
-        if not self.ok_callback is None:
+        if self.ok_callback is not None:
             self.ok_callback()
 
     def cancel_action(self):

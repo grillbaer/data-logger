@@ -90,6 +90,14 @@ class GraphsScreen(GestureDetector):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.graph_labels = []
+        self.history = SignalHistory()
+        self.plots = []
+        self.graph_visible = []
+        self.x_range = self.history.max_seconds
+        self.x_max = None
+        self.begin_min_y = None
+        self.begin_max_y = None
 
     def use_signals_config(self, signal_sources_config):
         self.graph_labels = []
