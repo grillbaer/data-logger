@@ -71,7 +71,7 @@ sudo raspi-config
 # (will disable bluetooth that is attached to UART)
 sudo raspi-config
 - disable login shell over serial, but enable serial port hardware
-sudo echo "dtoverlay=disable-bt" >>/boot/contig.txt
+sudo echo "dtoverlay=disable-bt" >>/boot/config.txt
 sudo systemctl disable hciuart
 
 # GPIO access for TSIC sensor support
