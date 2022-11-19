@@ -78,7 +78,7 @@ _nt_reading    = MappingSource(  'reading-heat-low-tariff', power_meter_heat,   
                                                                                   SignalSource.STATUS_OK if reading.consumption_low_sum_kwh is not None else SignalSource.STATUS_MISSING,
                                                                                   pmeter.reading_ts))
 _hh_leistung   = MappingSource(  'power-household',         power_meter_household, label='Haushalt',          unit='W',  value_format='{:.0f}',    color=[0.9, 0.8, 0.1, 1.0], with_graph=False, stale_secs=10,
-                                 mapping_func=partial(power_meter_hh_map_func, identifier="active_power"))
+                                 mapping_func=partial(power_meter_hh_map_func, "active_power"))
 
 
 signal_sources_config = {
