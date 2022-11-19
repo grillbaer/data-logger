@@ -229,7 +229,7 @@ class MappingSource(SignalSource):
         self._input_source.add_callback(self._updated)
         self._mapping_func = mapping_func
 
-    def _updated(self, input_value: SignalValue) -> None:
+    def _updated(self, input_value) -> None:
         signal_value = self._mapping_func(self._input_source, input_value)
         if signal_value.timestamp is None:
             signal_value = SignalValue(signal_value.value, signal_value.status, time.time())

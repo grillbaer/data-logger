@@ -7,8 +7,14 @@ __author__ = 'Holger Fleischmann'
 __copyright__ = 'Copyright 2018, Holger Fleischmann, Bavaria/Germany'
 __license__ = 'Apache License 2.0'
 
-import pigpio
+import time
+from functools import partial
+from typing import Any
 
+import pigpio
+from serial import Serial
+
+from powermetersmlobis import PowerMeterSmlObisReader
 from signalsources import TsicSource, Ds1820Source, DeltaSource, DigitalInSource, MappingSource, SignalSource, \
     SignalValue, PulseSource
 from powermeterapatorec3 import PowerMeterApatorEC3Repeating, PowerMeterApatorEC3
@@ -22,6 +28,16 @@ except IOError:
 pigpio_pi = pigpio.pi()
 
 power_meter_heat = PowerMeterApatorEC3Repeating(PowerMeterApatorEC3("/dev/serial0"), 10, 2*60)
+power_meter_household = PowerMeterSmlObisReader(serial_factory=lambda: Serial(port="/dev/ttyUSB0", baudrate=9600))
+
+
+def power_meter_hh_map_func(identifier: str, pmeter: PowerMeterSmlObisReader, _: Any) -> SignalValue:
+    obis_value = pmeter.values_by_id.get(identifier)
+    if obis_value is not None:
+        return SignalValue(obis_value.numeric_value, SignalSource.STATUS_OK, time.time())
+    else:
+        return SignalValue(0., SignalSource.STATUS_MISSING, time.time())
+
 
 _quelle_ein    = Ds1820Source(   'temp-from-well',           '28-0000089b1ca2', 1, label='Quelle ein',        unit='°C', value_format='{:.1f}',    color=[0.5, 0.5, 1.0, 1.0], z_order=1)
 _quelle_aus    = Ds1820Source(   'temp-to-well',             '28-000008640446', 1, label='Quelle aus',        unit='°C', value_format='{:.1f}',    color=[0.0, 0.2, 1.0, 1.0], z_order=2)
@@ -61,9 +77,13 @@ _nt_reading    = MappingSource(  'reading-heat-low-tariff', power_meter_heat,   
                                  mapping_func=lambda pmeter, reading: SignalValue(reading.consumption_low_sum_kwh,
                                                                                   SignalSource.STATUS_OK if reading.consumption_low_sum_kwh is not None else SignalSource.STATUS_MISSING,
                                                                                   pmeter.reading_ts))
-_hh_leistung   = PulseSource(    'power-household',         pigpio_pi, 18,         label='Haushalt',          unit='W',  value_format='{:.0f}',    color=[0.9, 0.8, 0.1, 1.0], with_graph=False, stale_secs=5*60,
-                                 trigger_level=pigpio.HIGH, dead_time_secs=1.6, pulse_min_secs=0.06,  # enough for 30 kW
-                                 calc_value_func=lambda counter, delta_secs: 3.6e6/75 / delta_secs)   # 75 pulses/kWh
+_hh_leistung   = MappingSource(  'power-household',         power_meter_household, label='Leistung Haushalt', unit='W',  value_format='{:.0f}',    color=[0.9, 0.8, 0.1, 1.0], with_graph=False, stale_secs=10,
+                                 mapping_func=partial(power_meter_hh_map_func, "active_power"))
+_hh_reading    = MappingSource(  'reading-household-import',power_meter_household, label='Stand Bezug',       unit='kWh',value_format='{:.1f}',    color=[0.9, 0.8, 0.1, 0.6], with_graph=False, stale_secs=10, small=True,
+                                 mapping_func=partial(power_meter_hh_map_func, "energy_import"))
+_hh_reading_exp= MappingSource(  'reading-household-export',power_meter_household, label='Stand Einsp.',      unit='kWh',value_format='{:.1f}',    color=[0.3, 1.0, 0.1, 0.6], with_graph=False, stale_secs=10, small=True,
+                                 mapping_func=partial(power_meter_hh_map_func, "energy_export"))
+
 
 signal_sources_config = {
     'groups' : [
@@ -105,7 +125,9 @@ signal_sources_config = {
             _nt_leistung,
             _ht_reading,
             _nt_reading,
-            _hh_leistung
+            _hh_leistung,
+            _hh_reading,
+            _hh_reading_exp
         ]}
     ],
 
