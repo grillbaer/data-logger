@@ -157,7 +157,7 @@ class PowerMeterSmlObisReader:
             try:
                 self._step()
             except Exception as err:
-                logger.exception("Unexpected exception ", err)
+                logger.exception("Unexpected exception")
         self._close_serial()
         logger.info("Stopped acquisition of power meter SML OBIS values")
 
@@ -193,7 +193,7 @@ class PowerMeterSmlObisReader:
             self._fire_received()
 
         except SmlLibException as err:
-            logger.exception("SML decoding error", err)
+            logger.exception("SML decoding error")
 
     def _open_serial(self) -> None:
         if self._serial is None:
