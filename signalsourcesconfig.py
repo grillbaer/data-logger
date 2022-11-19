@@ -79,9 +79,9 @@ _nt_reading    = MappingSource(  'reading-heat-low-tariff', power_meter_heat,   
                                                                                   pmeter.reading_ts))
 _hh_leistung   = MappingSource(  'power-household',         power_meter_household, label='Leistung Haushalt', unit='W',  value_format='{:.0f}',    color=[0.9, 0.8, 0.1, 1.0], with_graph=False, stale_secs=10,
                                  mapping_func=partial(power_meter_hh_map_func, "active_power"))
-_hh_reading    = MappingSource(  'reading-household-import',power_meter_household, label='Stand Bezug',       unit='kWh',value_format='{:.1f}',    color=[0.9, 0.8, 0.1, 1.0], with_graph=False, stale_secs=10, small=True,
+_hh_reading    = MappingSource(  'reading-household-import',power_meter_household, label='Stand Bezug',       unit='kWh',value_format='{:.1f}',    color=[0.9, 0.8, 0.1, 0.6], with_graph=False, stale_secs=10, small=True,
                                  mapping_func=partial(power_meter_hh_map_func, "energy_import"))
-_hh_reading_exp= MappingSource(  'reading-household-export',power_meter_household, label='Stand Einspeisung', unit='kWh',value_format='{:.1f}',    color=[0.9, 0.8, 0.1, 1.0], with_graph=False, stale_secs=10, small=True,
+_hh_reading_exp= MappingSource(  'reading-household-export',power_meter_household, label='Stand Einsp.',      unit='kWh',value_format='{:.1f}',    color=[0.3, 1.0, 0.1, 0.6], with_graph=False, stale_secs=10, small=True,
                                  mapping_func=partial(power_meter_hh_map_func, "energy_export"))
 
 
