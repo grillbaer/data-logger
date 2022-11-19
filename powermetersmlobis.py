@@ -152,12 +152,14 @@ class PowerMeterSmlObisReader:
             callback(self)
 
     def _run(self) -> None:
+        logger.info("Starting acquisition of power meter SML OBIS values")
         while self._running_event.is_set():
             try:
                 self._step()
             except Exception as err:
                 logger.exception("Unexpected exception ", err)
         self._close_serial()
+        logger.info("Stopped acquisition of power meter SML OBIS values")
 
     def _step(self) -> None:
         self._open_serial()
