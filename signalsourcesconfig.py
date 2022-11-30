@@ -83,7 +83,14 @@ _hh_reading    = MappingSource(  'reading-household-import',power_meter_househol
                                  mapping_func=partial(power_meter_hh_map_func, "energy_import"))
 _hh_reading_exp= MappingSource(  'reading-household-export',power_meter_household, label='Stand Einsp.',      unit='kWh',value_format='{:.1f}',    color=[0.3, 1.0, 0.1, 0.6], with_graph=False, stale_secs=10, small=True,
                                  mapping_func=partial(power_meter_hh_map_func, "energy_export"))
-
+_hh_frequency  = MappingSource(  'frequency-household',     power_meter_household, label=' Frequenz',         unit='Hz', value_format='{:.2f}',    color=[0.7, 0.7, 0.7, 1.0], with_graph=False, stale_secs=10,
+                                 mapping_func=partial(power_meter_hh_map_func, "frequency"))
+_hh_leistung_l1= MappingSource(  'power-household-l1',      power_meter_household, label=' Leistung L1 Hh.',  unit='W',  value_format='{:.0f}',    color=[0.6, 0.6, 0.4, 1.0], with_graph=False, stale_secs=10,
+                                 mapping_func=partial(power_meter_hh_map_func, "active_power_l1"))
+_hh_leistung_l2= MappingSource(  'power-household-l2',      power_meter_household, label=' Leistung L2 Hh.',  unit='W',  value_format='{:.0f}',    color=[0.6, 0.6, 0.4, 1.0], with_graph=False, stale_secs=10,
+                                 mapping_func=partial(power_meter_hh_map_func, "active_power_l2"))
+_hh_leistung_l3= MappingSource(  'power-household-l3',      power_meter_household, label=' Leistung L3 Hh.',  unit='W',  value_format='{:.0f}',    color=[0.6, 0.6, 0.4, 1.0], with_graph=False, stale_secs=10,
+                                 mapping_func=partial(power_meter_hh_map_func, "active_power_l3"))
 
 signal_sources_config = {
     'groups' : [
@@ -127,7 +134,11 @@ signal_sources_config = {
             _nt_reading,
             _hh_leistung,
             _hh_reading,
-            _hh_reading_exp
+            _hh_reading_exp,
+            _hh_frequency,
+            _hh_leistung_l1,
+            _hh_leistung_l2,
+            _hh_leistung_l3
         ]}
     ],
 
