@@ -91,6 +91,12 @@ _hh_leistung_l2= MappingSource(  'power-household-l2',      power_meter_househol
                                  mapping_func=partial(power_meter_hh_map_func, "active_power_l2"))
 _hh_leistung_l3= MappingSource(  'power-household-l3',      power_meter_household, label=' Leistung L3 Hh.',  unit='W',  value_format='{:.0f}',    color=[0.6, 0.6, 0.4, 1.0], with_graph=False, stale_secs=10,
                                  mapping_func=partial(power_meter_hh_map_func, "active_power_l3"))
+_hh_voltage_l1 = MappingSource(  'voltage-household-l1',    power_meter_household, label=' Spannung L1 Hh.',  unit='V',  value_format='{:.1f}',    color=[0.2, 0.6, 0.7, 1.0], with_graph=False, stale_secs=10,
+                                 mapping_func=partial(power_meter_hh_map_func, "voltage_l1"))
+_hh_voltage_l2 = MappingSource(  'voltage-household-l2',    power_meter_household, label=' Spannung L2 Hh.',  unit='V',  value_format='{:.1f}',    color=[0.2, 0.6, 0.7, 1.0], with_graph=False, stale_secs=10,
+                                 mapping_func=partial(power_meter_hh_map_func, "voltage_l2"))
+_hh_voltage_l3 = MappingSource(  'voltage-household-l3',    power_meter_household, label=' Spannung L3 Hh.',  unit='V',  value_format='{:.1f}',    color=[0.2, 0.6, 0.7, 1.0], with_graph=False, stale_secs=10,
+                                 mapping_func=partial(power_meter_hh_map_func, "voltage_l3"))
 
 signal_sources_config = {
     'groups' : [
@@ -138,7 +144,10 @@ signal_sources_config = {
             _hh_frequency,
             _hh_leistung_l1,
             _hh_leistung_l2,
-            _hh_leistung_l3
+            _hh_leistung_l3,
+            _hh_voltage_l1,
+            _hh_voltage_l2,
+            _hh_voltage_l3
         ]}
     ],
 
