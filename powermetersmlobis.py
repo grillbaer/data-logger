@@ -164,7 +164,7 @@ class PowerMeterSmlObisReader:
     def _step(self) -> None:
         self._open_serial()
         try:
-            data = self._serial.read()
+            data = self._serial.read(1024)
         except SerialException as err:
             self._close_serial()
             return
@@ -214,7 +214,7 @@ if __name__ == "__main__":
 
 
     def _serial_factory():
-        return Serial(port="/dev/ttyUSB0", baudrate=9600)
+        return Serial(port="/dev/ttyUSB0", baudrate=9600, timeout=0.2)
 
 
     reader = PowerMeterSmlObisReader(serial_factory=_serial_factory)

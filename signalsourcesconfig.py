@@ -28,7 +28,7 @@ except IOError:
 pigpio_pi = pigpio.pi()
 
 power_meter_heat = PowerMeterApatorEC3Repeating(PowerMeterApatorEC3("/dev/serial0"), 10, 2*60)
-power_meter_household = PowerMeterSmlObisReader(serial_factory=lambda: Serial(port="/dev/ttyUSB0", baudrate=9600))
+power_meter_household = PowerMeterSmlObisReader(serial_factory=lambda: Serial(port="/dev/ttyUSB0", baudrate=9600, timeout=0.2))
 
 
 def power_meter_hh_map_func(identifier: str, pmeter: PowerMeterSmlObisReader, _: Any) -> SignalValue:
